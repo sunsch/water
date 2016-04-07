@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+            <property name="driverClassName"><value>com.mysql.jdbc.Driver</value></property>
+            <property name="url"><value>jdbc:mysql://localhost:3306/jilian</value></property>
+            <property name="username"><value>root</value></property>
+            <property name="password"><value></value></property>
+    </bean>
+
+<!-- Session工厂类 -->
+    <bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		 <property name="dataSource">
+                  <ref bean="dataSource" />
+         </property>
+		 <property name="hibernateProperties">
+          <props>
+                <prop key="hibernate.dialect">
+                 org.hibernate.dialect.MySQLDialect
+          </prop>
+          <prop key="hibernate.show_sql">
+           true
+          </prop>
+          <!-- 请慎用 使用的时候会删除数据库内容-->
+    <prop key="hibernate.hbm2ddl.auto">create</prop>
+          </props>
+  </property>
+  <property name="mappingResources">
+   <value>test/Book.hbm.xml</value>
+   </property>
+     </bean>
+
+       <!-- 声明事务 -->
+        <bean   id= "transactionManager"     class= "org.springframework.orm.hibernate3.HibernateTransactionManager "> 
+        <property   name= "sessionFactory"> 
+        <ref   bean= "sessionFactory"   /> 
+        </property> 
+        </bean> 
+        
+     <!-- 实现DAO的管理方法托管 -->
+    <bean id="baseTxProxy" lazy-init="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" abstract="true">
+        <property name="transactionManager" >
+        <ref bean="transactionManager" />
+        </property>
+        <property name="transactionAttributes">
+        <props>
+    <prop key="*">PROPAGATION_REQUIRED</prop>
+    <prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>  
+    <prop key="is*">PROPAGATION_REQUIRED,readOnly</prop>         
+    <prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>      
+            </props>
+        </property>
+    </bean>
+
+     <!-- 自动代理 DefaultAdvisorAutoProxyCreator   
+     <bean id="TestBeanA" class="testaop.TestBeanA" />  
+     <bean id="BeanB" class="testaop.BeanB" />  
+     <bean id="BeforeAdvice" class="testaop.BeforeAdvice"/> 
+     <bean id="BookDAO" class="test.BookDAO">
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory" />
+    	 </property>
+     </bean>
+     <bean id="springDAO" class="testaop.springDAO"/>
+     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />  
+     
+    <bean class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">  
+         <property name="advice" ref="BeforeAdvice" />  
+         <property name="mappedNames">  
+             <list>  
+                 <value>MyMethodc</value>      <方法名>
+             </list>  
+         </property>  
+     </bean>
+    -->
+    <!--  BeanNameAutoProxyCreator   --> 
+     <bean id="TestBeanA" class="testaop.TestBeanA" />  
+     <bean id="BeanB" class="testaop.BeanB" />  
+     <bean id="BeforeAdvice" class="testaop.BeforeAdvice"/> 
+     <bean id="BookDAO" class="test.BookDAO" >
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+    	 </property>
+     </bean>
+     <bean id="topicService" parent="baseTxProxy"> 
+       <property name="transactionManager"> 
+       <ref bean="transactionManager" /> 
+       </property> 
+       <property name="target"> 
+       <ref bean="BookDAO" /> 
+       </property> 
+     </bean> 
+     <!-- 拦截器自动调用接口 -->
+     <bean id="spring" class="testaop.springDAO"/><!--spring拦截器的方法非实体  -->
+     <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+         <property name="beanNames">   
+             <list>  
+                 <value>spring</value>  <!-- id的名称 -->
+             </list>  
+         </property>  
+         <property name="interceptorNames">  
+             <list>  
+                 <value>BeforeAdvice</value>  
+             </list>  
+         </property>  
+     </bean>   
+</beans>  
+

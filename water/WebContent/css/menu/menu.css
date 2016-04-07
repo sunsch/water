@@ -1,0 +1,17 @@
+*{ margin:0; padding:0;}
+ul{ list-style:none;}
+
+.system_menu{ width:949px; margin:0 auto; overflow:hidden;}
+.outer{ background:url("../../image/menu/menu_sprites.png") no-repeat top left; margin-top:0px; padding-left:15px;}
+.inner{ background:url("../../image/menu/menu_sprites.png") no-repeat top right; padding-right:5px;}
+.system_menu ul{ background:url("../../image/menu/menu_sprites.png") repeat-x 0 -102px; height:34px; }
+.system_menu li{ float:left; width:auto !important; width:1%; white-space:nowrap; padding:0 5px; background:url("../../image/menu/menu_sprites.png") no-repeat bottom left;}
+.system_menu li a{ display:block; text-decoration:none; padding-left:15px; cursor:pointer;}
+.system_menu li a span { display:block;height:34px; line-height:34px; color:white; padding-right:15px;}
+
+.system_menu li a:hover { background:url("../../image/menu/menu_sprites.png") no-repeat left -68px;}
+.system_menu li a:hover span { background:url("../../image/menu/menu_sprites.png") no-repeat right -68px;}
+
+.system_menu li.selected a { background:url("../../image/menu/menu_sprites.png") no-repeat left -34px;}
+.system_menu li.selected a span { background:url("../../image/menu/menu_sprites.png") no-repeat right -34px; color:red;}
+

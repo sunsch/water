@@ -1,0 +1,20 @@
+Example: Load the JSON data from test.js, passing along additional data, and access a name from the returned JSON data.
+
+$.getJSON("test.js", { name: "John", time: "2pm" }, function(json){
+    alert("JSON Data: " + json.users[3].name);
+    });
+
+Example: List the result of a consultation of pages.php in HTML as an array. By Manuel Gonzalez.
+
+
+
+var id=$("#id").attr("value");
+$.getJSON("pages.php",{id:id},dates);
+
+function dates(datos) {
+    
+  $("#list").html("Name:"+datos[1].name+"<br>"+"Last Name:"+datos[1].lastname+"<br>"+"Address:"+datos[1].address);
+}
+
+
+http://json-lib.sourceforge.net/usage.html

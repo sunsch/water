@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory name="SessionFactory">
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.password">passw0rd</property><!-- 223512 -->
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/water</property>
+		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.format_sql">true</property>
+		<property name="connection.autocommit">false</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		
+		<!-- configuration pool via c3p0 -->
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="c3p0.acquire_increment">1</property>
+		<property name="c3p0.idle_test_period">100</property> <!-- seconds -->
+		<property name="c3p0.max_size">100</property>
+		<property name="c3p0.max_statements">1000</property>
+		<property name="c3p0.min_size">2</property>
+		<property name="c3p0.timeout">1200</property> <!-- seconds -->
+		
+		<mapping resource="com/exam/entity/Users.hbm.xml" />
+		<mapping resource="com/exam/entity/Product.hbm.xml" />
+		<mapping resource="com/exam/entity/Customer.hbm.xml" />
+		<mapping resource="com/exam/entity/SalseHistory.hbm.xml" />
+		
+		
+
+	</session-factory>
+</hibernate-configuration>

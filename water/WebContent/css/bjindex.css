@@ -1,0 +1,188 @@
+@CHARSET "UTF-8";
+body {
+	margin: 0 auto;
+	padding: 0;
+	background: #FFF;/*#F5F5F5*/
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #6666CC;
+}
+
+img
+{
+	border:0px;
+}
+
+#content {
+	width: 960px;
+	margin-top: 0;
+	margin-right: auto;
+	margin-bottom: 0px;
+	margin-left: auto;
+	padding-top: 10px;
+	padding-right: 0;
+	padding-bottom: 0px;
+	padding-left: 0;
+	height: auto;
+}
+
+#left_navi_content {
+	/*  background-color: #EBF8FE;  F5F5F5 */
+}
+#left_navi_content a {
+	font: bold 14px/1.2 Arial;
+	color: #1155BB;
+	/*background-color: #D6E5F2;*/
+}
+#left_navi_content a:hover{
+	background-color: #D6E5F2;
+	
+
+}
+
+#left_navi_content  img {vertical-align:middle;}  
+
+
+#accordion li a
+{
+	color: blue;
+}
+
+.myinfoui-myrecord
+{
+	padding-top:10px;
+	padding-left:1px;
+}
+
+.myinfoui-myrecord li a
+{
+	padding-left:10px;
+	clear: both;
+	padding-left: 30px;
+	background: url(../image/icons/myinfo-ui-list-icons.png) no-repeat;
+	line-height: 23px;
+}
+
+#page_footer {
+	font-size: 12px;
+	color: #F93D00;
+}
+#page_footer a{
+	text-decoration:none;
+	color: #0085CF;
+}
+
+.block_link_no_decoration a{
+	text-decoration:none;
+	font-weight:normal;
+	color: #6666CC;/* 0066CC  #6666CC */
+}
+.block_link_no_decoration a:active, a:hover{
+	text-decoration:none;
+	/*
+	font-weight:bold;
+	*/
+	
+	background-color: #6666CC;
+	color: #ffffff;
+}
+
+#forum_navigator a{
+	font-weight:normal;
+	color: #6666CC;/* 0066CC  #6666CC */
+}
+#forum_navigator a:active, a:hover{
+	text-decoration:none;
+	/*
+	font-weight:bold;
+	*/
+	
+	background-color: #EFE0D7;
+	color: #000;
+}
+
+.block_link_no_decoration li{
+	padding: 0 0 0 20px; 
+	background: url(../image/forhome/bullet1.gif) no-repeat left center;
+}
+
+.index_search_bt a:hover{
+background:url(../../image/searchbt/search_hover_bg.gif) repeat-x center center;
+border:1px solid #fff;
+height:20px;
+line-height:20px;
+color:#0066CC;
+
+}
+
+
+ .my_button_login_home
+{
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-align:center; 
+    font-weight: bold;
+    color: #164BA0  ;
+	border: 1px solid #83AAD3  ; 
+	background-color: #FFFFFF;
+    height:24px;
+    width:80px;
+ }
+  .my_button_login_home:hover
+{
+	background-color: #CCFF99;
+    border: 1px solid #83AAD3  ; 
+ }
+  .my_button_reg
+{
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-align:center; 
+    font-weight: bold;
+    color: #164BA0  ;
+    background-color: #FFF9F1;
+    border: 1px solid #83AAD3  ; 
+    height:24px;
+    width:80px;
+ }
+ .my_button_reg:hover
+{
+    background-color: #DBCAF4;
+    border: 1px solid #83AAD3  ; 
+}
+
+  .my_button_doexercise
+{
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-align:center; 
+    font-weight: bold;
+    color: #164BA0  ;
+    background-color: #FFF9F1;
+    border: 1px solid #83AAD3  ; 
+    height:24px;
+    width:90px;
+ }
+  .my_button_doexercise:hover
+{
+    background-color: #DBCAF4;
+    border: 1px solid #83AAD3  ; 
+}
+ 
+
+.commitment_tooltip
+{
+	font-size: 12px;
+}
+.collaboration-sub-title
+{
+	font-size:15px;
+	font-weight: bold;
+	display:block;
+	width:940px;
+	text-align:left;
+}
+.collaboration-sub-content-title
+{
+	font-weight: bold;
+}

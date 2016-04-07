@@ -1,0 +1,64 @@
+数据库连接是一种关键的有限的昂贵的资源，这一点在多用户的网页应用程序中体现得尤为突出。
+对数据库连接的管理能显著影响到整个应用程序的伸缩性和健壮性，影响到程序的性能指标。
+数据库连接池正是针对这个问题提出来的。
+　　数据库连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，
+而再不是重新建立一个；释放空闲时间超过最大空闲时间的数据库连接来避免因为没有释放数据库连接而引起的数据库连接遗漏。
+这项技术能明显提高对数据库操作的性能。
+　　数据库连接池在初始化时将创建一定数量的数据库连接放到连接池中，这些数据库连接的数量是由最小数据库连接数来设定的。无论这些数据库连接是否被使用，连接池都将一直保证至少拥有这么多的连接数量。连接池的最大数据库连接数量限定了这个连接池能占有的最大连接数，当应用程序向连接池请求的连接数超过最大连接数量时，
+这些请求将被加入到等待队列中。数据库连接池的最小连接数和最大连接数的设置要考虑到下列几个因素：
+1) 最小连接数是连接池一直保持的数据库连接，所以如果应用程序对数据库连接的使用量不大，
+将会有大量的数据库连接资源被浪费； @:qhbe|m
+2) 最大连接数是连接池能申请的最大连接数，如果数据库连接请求超过此数，
+后面的数据库连接请求将被加入到等待队列中，这会影响之后的数据库操作。 -d e53@\
+3) 如果最小连接数与最大连接数相差太大，那么最先的连接请求将会获利，
+之后超过最小连接数量的连接请求等价于建立一个新的数据库连接。
+不过，这些大于最小连接数的数据库连接在使用完不会马上被释放，
+它将被放到连接池中等待重复使用或是空闲超时后被释放。 
+
+<!--连接池中保留的最小连接数。-->
+<property name="minPoolSize">
+<value>5</value>
+</property>
+<!--连接池中保留的最大连接数。Default: 15 -->
+<property name="maxPoolSize">
+<value>30</value>
+</property>
+<!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
+<property name="initialPoolSize">
+<value>10</value>
+</property>
+<!--最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+<property name="maxIdleTime">
+<value>60</value>
+</property>
+<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+<property name="acquireIncrement">
+<value>5</value>
+</property>
+<!--JDBC的标准参数，用以控制数据源内加载的PreparedStatements数量。但由于预缓存的statements
+属于单个connection而不是整个连接池。所以设置这个参数需要考虑到多方面的因素。
+如果maxStatements与maxStatementsPerConnection均为0，则缓存被关闭。Default: 0-->
+<property name="maxStatements">
+<value>100</value>
+</property>
+<!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+<property name="idleConnectionTestPeriod">
+<value>60</value>
+</property>
+<!--定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 -->
+<property name="acquireRetryAttempts">
+<value>30</value>
+</property>
+
+<!--获取连接失败将会引起所有等待连接池来获取连接的线程抛出异常。但是数据源仍有效
+保留，并在下次调用getConnection()的时候继续尝试获取连接。如果设为true，那么在尝试
+获取连接失败后该数据源将申明已断开并永久关闭。Default: false-->
+<property name="breakAfterAcquireFailure">
+<value>true</value>
+</property>
+<!--因性能消耗大请只在需要的时候使用它。如果设为true那么在每个connection提交的
+时候都将校验其有效性。建议使用idleConnectionTestPeriod或automaticTestTable
+等方法来提升连接测试的性能。Default: false -->
+<property name="testConnectionOnCheckout">
+<value>false</value>
+</property>

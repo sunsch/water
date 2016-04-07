@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2010-6-1 15:25:51 by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.framework.auto.basicentity.Operations" table="operations"  catalog="exam">
+        <id name="optid" type="int">
+            <column name="optid" />
+			<generator class="native" />
+        </id>
+        <many-to-one name="roles" class="com.framework.auto.basicentity.Roles" fetch="select">
+            <column name="rid" />
+        </many-to-one>
+        <property name="optname" type="string">
+            <column name="optname" length="100" />
+        </property>
+    </class>
+</hibernate-mapping>

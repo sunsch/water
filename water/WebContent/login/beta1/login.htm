@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fb="http://ogp.me/ns/fb#">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="/exam/image/logo/icon/logo5_3.ico" type="image/x-icon" />
+
+<title>在线水资源与客户关系管理系统2.0 Beta版</title>
+
+<link href="/water/login/beta1/common.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/water/login/beta1/dlgbox.css" media="screen" rel="stylesheet" type="text/css" />
+<liNK rel="stylesheet" type="text/css" href="css/jquery-ui-1.10.4.custom/jquery-ui-1.10.4.custom.min.css">
+
+
+<script type="text/javascript" src="/water/js/jquery/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/water/js/jqueryui/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="/water/js/framework/common_utils.js"></script>
+
+</head>
+<body class="b-wk l-en">
+
+	<div class="p40">
+		<div class="dialog center">
+			<div class="dialog_content login">
+
+
+				<div style="margin: 5px 0; vertical-align:middle;text-align: center; clear: both;font-size:15px;color:blue;font-weight:bold;">
+					<img alt="在线水资源与客户关系管理系统 2.0 Beta版" height="56" src="/water/image/logo/w1.jpg" width="80" style='vertical-align:middle;'/>
+					在线水资源与客户关系管理系统 2.0 Beta版
+				</div>
+
+
+				<div id="logins">
+					<form action="/water/LoginHandler" id="login_form" name="login_form" method="post">
+
+						<div class="content" style="height: 110px;">
+							<p>
+								<span style="margin-left:40px;color: #10334D; line-height: 24px; font-size: 13px!important;font-weight:bold;">用户帐号：</span> 
+								<input id="username" name="username" style="width: 200px;" tabindex="1" type="text" value="" />
+							</p>
+
+							<p>
+								<span style="margin-left:40px;color: #10334D; line-height: 24px; font-size: 13px!important;font-weight:bold;">用户密码：</span>
+								<input id="password" name="password" style="width: 200px;" tabindex="2" type="password" value="" />
+							</p>
+
+							<p style="margin-bottom: 5px;font-size: 13px!important;">
+								<a href="/exam/register/lostpassword.jsp" class="indented" >忘记密码？</a>
+								<span id='mes_id' style=' color: red;'></span>
+							</p>
+
+							<div style="width: 0; height: 0; overflow: hidden;">
+								<button type="submit">&nbsp;</button>
+							</div>
+						</div>
+					</form>
+				</div>
+
+
+				<div class="dialog_buttons">
+					<input class="button default" id="btn_signin" name="commit"
+						onclick="logon();"
+						style="font-size: 17px; float: left;" tabindex="3" type="button"
+						value="登录" /> <input type="button"
+						onclick="window.location.href = '/exam/register/reg.jsp'; return false;"
+						class="button" style="font-size: 14px" value="注册" />
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+
+
+<script type="text/javascript">
+function logon()
+{
+	var username=$('#username').val();
+	var password=$('#password').val();
+	var argsdata={username:username,password:password};
+	var	data={clazz:'com.exam.action.proxy.account.LoginProxy',service:'doLogin',args:JSON.stringify(argsdata)};
+	var success=function(rdata){
+		if(rdata.flag=='success')
+		{
+			window.location.href='/water/water.html';
+		}else
+		{
+			show_user_msg('错误的用户名称或者密码！');
+		}
+	};
+	invoke_proxy(data,success);
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+
+
+product:
+pid,product_name,volume,price,cash_return,comments
+
+customer:
+cid,types[agent user,common user], agent_customer_cid,customer_name,sex,phone,address,comments
+
+users:
+userid,username,password,comments
+
+sales_history:
+sid,customer_id,product_id,quantity,sale_time,comments
+
+
+CREATE DATABASE `water` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+CREATE TABLE `customer` (
+  `cid` int(11) NOT NULL AUTO_INCREMENT,
+  `types` int(11) DEFAULT NULL,
+  `agent_customer_cid` int(11) DEFAULT NULL,
+  `customer_name` varchar(45) DEFAULT NULL,
+  `sex` int(11) DEFAULT NULL,
+  `phone` varchar(45) DEFAULT NULL,
+  `address` varchar(245) DEFAULT NULL,
+  `comments` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`cid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `product` (
+  `pid` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(100) DEFAULT NULL,
+  `volume` float DEFAULT NULL,
+  `price` float DEFAULT NULL,
+   `cash_return` float DEFAULT NULL,
+  `comments` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`pid`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+CREATE TABLE `sales_history` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `sale_time` varchar(30) DEFAULT NULL,
+  `comments` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `users` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `comments` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`userid`)
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
+
+------------------------------------paganition-----------------
+function products_js_ListProducts()
+{
+	var content='';
+	content+='<div id="products_js_ListProducts_onepage" >';
+	content+='</div>';
+	content+='<div id="products_js_ListProducts_pagination" class="meneame">';
+	content+='</div>';
+	$('#center_div_id').html(content);
+	products_js_ListProductsAllCount();
+
+}
+function products_js_ListProductsAllCount()
+{
+	var argsdata={};
+	var	data={clazz:'com.exam.action.proxy.product.ProductProxy',service:'listProductCount',args:JSON.stringify(argsdata)};
+	var success=function(rdata){
+		var opt = {callback: products_js_ListProductsOnePage};
+		$("#products_js_ListProducts_pagination").pagination(rdata.count,opt);
+	};
+	invoke_proxy(data,success);
+}
+function products_js_ListProductsOnePage(page_index, jq)
+{
+	var argsdata={page_index:page_index};
+	var	data={clazz:'com.exam.action.proxy.product.ProductProxy',service:'listProductOnePage',args:JSON.stringify(argsdata)};
+	var success=function(rdata){
+		products_js_ShowAllProducts(rdata);
+	};
+	invoke_proxy(data,success);
+}
+
+function products_js_ShowAllProducts(products)
+{
+	var newcontent = "";
+	newcontent+=("<table class='OPES_TABLE_ID' cellspacing='0' ><thead><tr><th data-sort-ignore='true' scope=col>修改</th><th scope=col>顺序</th><th data-sort-ignore='true'  scope=col>ID</th><th data-sort-ignore='true' scope=col>产品名称</th><th data-sort-ignore='true' scope=col>容量</th><th data-sort-ignore='true' scope=col>返现设置</th><th data-sort-ignore='true' scope=col>价格</th><th scope=col>完成状态</th><th data-sort-ignore='true' scope=col>删除</th></tr></thead>");
+	if(products.length==0)
+	{
+		newcontent+="<tr>";
+		newcontent+=("<td colspan='100%' style='text-align:center'>暂时没有数据</td>");
+		newcontent+="</tr>";
+	}else
+	{
+		$.each(products,function(i){
+			newcontent+="<tr>";
+			newcontent+="<td><a href='javascript:;'><img onclick=toolbox_data_column_js_openAddOrEditColumnDialog() width=22px height=22px border=0 src='imgs/edit.png' ></img></a></td>";
+			newcontent+=("<td>"+ (i+1) +"</td>");
+			newcontent+=("<td>"+ products[i].pid +"</td>");
+			newcontent+=("<td>"+ products[i].product_name +"</td>");
+			newcontent+=("<td>"+ products[i].volume +"</td>");
+			newcontent+=("<td>"+ products[i].cash_return +"</td>");
+			newcontent+=("<td>"+ products[i].price +"</td>");
+			newcontent+="<td><a class='opes2_tooltip' href='javascript:;' title='已完成本条数据' href='javascript:;'><img width=24px height=24px border=0 src='imgs/accepted_48.png' ></img></a></td>";
+			newcontent+="<td><a href='javascript:;'><img onclick=products_js_DeleteProduct("+ products[i].pid  +") width=24px height=24px border=0 src='imgs/cancel_48.png' ></img></a></td>";
+			
+			newcontent+="</tr>";
+		});
+	}
+	newcontent+="</tbody></table>";
+	$('#products_js_ListProducts_onepage').html(newcontent);
+	$('.OPES_TABLE_ID').footable();
+}
+
+
+--------------------------------------------------------------------------
+
+

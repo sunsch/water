@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+   <bean id="sessionFactory"
+        class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="configLocation"
+            value="classpath:com/spring/config/hibernate.cfg.xml">
+        </property>
+    </bean>
+
+
+
+    
+    <bean id="RolesHome" class="com.sprintt1.entity.RolesHome" >
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+    	 </property>
+     </bean>
+     <bean id="UsersHome" class="com.sprintt1.entity.UsersHome" >
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+    	 </property>
+     </bean>
+     <bean id="QuestionsHome" class="com.sprintt1.entity.QuestionsHome" >
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+    	 </property>
+     </bean>
+     <bean id="AnswersHome" class="com.sprintt1.entity.AnswersHome" >
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+    	 </property>
+     </bean>
+     
+	
+     
+       <!-- 声明事务 -->
+        <bean   id= "transactionManager"     class= "org.springframework.orm.hibernate3.HibernateTransactionManager "> 
+        	<property   name= "sessionFactory"> 
+        	<ref   bean= "sessionFactory"   /> 
+        	</property> 
+        </bean> 
+        
+     <!-- 实现DAO的管理方法托管 -->
+    <bean id="homeTxProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target" ref="UsersHome"/>
+        
+        <property name="transactionAttributes">
+        <props>
+    		<prop key="*">PROPAGATION_REQUIRED</prop>
+    		<prop key="save*">PROPAGATION_REQUIRED,-NumberFormatException</prop>
+    		<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>  
+    		<prop key="is*">PROPAGATION_REQUIRED,readOnly</prop>         
+    		<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>      
+         </props>
+        </property>
+    </bean>
+
+ 	<bean id="usersHomeTxProxy" parent="homeTxProxy"> 
+       <property name="transactionManager"> 
+       	<ref bean="transactionManager" /> 
+       </property> 
+       <property name="target" ref="UsersHome"></property> 
+     </bean> 
+     <bean id="rolesHomeTxProxy" parent="homeTxProxy"> 
+       <property name="transactionManager"> 
+       	<ref bean="transactionManager" /> 
+       </property> 
+       <property name="target" ref="RolesHome"></property> 
+     </bean>
+     <bean id="questionsHomeTxProxy" parent="homeTxProxy"> 
+       <property name="transactionManager"> 
+       	<ref bean="transactionManager" /> 
+       </property> 
+       <property name="target" ref="QuestionsHome"></property> 
+     </bean>
+     <bean id="answersHomeTxProxy" parent="homeTxProxy"> 
+       <property name="transactionManager"> 
+       	<ref bean="transactionManager" /> 
+       </property> 
+       <property name="target" ref="AnswersHome"></property> 
+     </bean>
+
+ 
+     
+     
+     <!-- 自动代理 DefaultAdvisorAutoProxyCreator   
+     <bean id="TestBeanA" class="testaop.TestBeanA" />  
+     <bean id="BeanB" class="testaop.BeanB" />  
+     <bean id="BeforeAdvice" class="testaop.BeforeAdvice"/> 
+     <bean id="BookDAO" class="test.BookDAO">
+     <property name="sessionFactory">
+    		<ref bean="sessionFactory" />
+    	 </property>
+     </bean>
+     <bean id="springDAO" class="testaop.springDAO"/>
+     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />  
+     
+    <bean class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">  
+         <property name="advice" ref="BeforeAdvice" />  
+         <property name="mappedNames">  
+             <list>  
+                 <value>MyMethodc</value>      <方法名>
+             </list>  
+         </property>  
+     </bean>
+    -->
+    
+    
+     
+     <!-- 拦截器自动调用接口 
+     <bean id="spring" class="testaop.springDAO"/>
+     <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+         <property name="beanNames">   
+             <list>  
+                 <value>spring</value>  
+             </list>  
+         </property>  
+         <property name="interceptorNames">  
+             <list>  
+                 <value>BeforeAdvice</value>  
+             </list>  
+         </property>  
+     </bean>   
+     -->
+     
+     <!-- 
+     <bean id="LoginHandler" class="com.sprintt1.action.LoginHandler" >
+     <property name="udao">
+    		<ref bean="UsersHome"  />
+    	 </property>
+     </bean>
+     <bean id="RegisterHandler" class="com.sprintt1.action.RegisterHandler" >
+     <property name="udao">
+    		<ref bean="UsersHome"  />
+    	 </property>
+    	 <property name="rdao">
+    		<ref bean="RolesHome"  />
+    	 </property>
+     </bean>
+     <bean id="LogoutHandler" class="com.sprintt1.action.LogoutHandler" >
+     <property name="udao">
+    		<ref bean="UsersHome"  />
+    	 </property>
+     </bean>
+      -->
+     
+</beans>  
+

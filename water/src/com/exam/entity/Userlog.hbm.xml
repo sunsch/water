@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2015-6-6 10:52:06 by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping package="com.exam.entity">
+    <class name="Userlog" table="userlog" schema="dbo" catalog="exam">
+        <id name="ulid" type="int">
+            <column name="ulid" />
+			<generator class="native" />
+        </id>
+        <many-to-one name="users" class="com.exam.entity.Users" fetch="select">
+            <column name="userid" />
+        </many-to-one>
+        <property name="lastlogontime" type="timestamp">
+            <column name="lastlogontime" length="23" />
+        </property>
+        <property name="totalonlinetime" type="java.lang.Integer">
+            <column name="totalonlinetime" />
+        </property>
+        <property name="totallogoncount" type="java.lang.Integer">
+            <column name="totallogoncount" />
+        </property>
+        <property name="comments" type="string">
+            <column name="comments" length="100" />
+        </property>
+    </class>
+</hibernate-mapping>

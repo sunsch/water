@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2010-6-1 15:25:51 by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.framework.auto.basicentity.Users" table="users"  catalog="exam">
+        <id name="uid" type="int">
+            <column name="uid" />
+			<generator class="native" />
+        </id>
+        <property name="username" type="string">
+            <column name="username" length="50" not-null="true" />
+        </property>
+        <property name="realname" type="string">
+            <column name="realname" length="50" />
+        </property>
+        <property name="password" type="string">
+            <column name="password" length="50" />
+        </property>
+        <property name="sex" type="string">
+            <column name="sex" length="50" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" length="50" />
+        </property>
+        <property name="address" type="string">
+            <column name="address" length="150" />
+        </property>
+        <property name="birthday" type="timestamp">
+            <column name="birthday" length="16" />
+        </property>
+        
+        <property name="comments" type="string">
+            <column name="comments" length="200" />
+        </property>
+        <set name="ugRelations" inverse="true">
+            <key>
+                <column name="uid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.UgRelation" />
+        </set>
+        <set name="urRelations" inverse="true">
+            <key>
+                <column name="uid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.UrRelation" />
+        </set>
+    </class>
+</hibernate-mapping>

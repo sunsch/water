@@ -1,0 +1,9 @@
+使用Hibernate，在进行查询分页的操作上，是具有非常大的灵活性，Hibernate会首先尝试用特定数据库的分页sql，如果没用，再尝试Scrollable，如果不行，最后采用rset.next()移动的办法。
+
+Hibernate 可以实现分页查询，例如：
+从第2万条开始取出100条记录
+
+Query q = session.createQuery("from Cat as c");
+q.setFirstResult(20000);
+q.setMaxResults(100);
+List l = q.list();

@@ -1,0 +1,30 @@
+all the content is created by ajax for autorising
+
+
+系统全局权限认证：Filter
+一. 对整个系统的所有资源进行用户权限认证，如：需登录访问
+二. 对目录资源以及子文件夹等进行权限认证
+
+EncodingFilter.java(必须有)>>LogonFilter.java(可以有，根据需求)>>
+AuthenticationFilter.java(可以有，前提是登录)>>CourseSelectFilter.java(可以有，前提是登录)
+
+
+每个操作的权限认证：使用Spring AOP 或者是把操作与role的映射写入数据库，读取时做二级缓存，用Fileter认证时不用每次都读取数据库。
+一· 1. 在开始开发之前，做需求的时候就要决定好角色role，每个role具有哪些权限。如果决定不好就是系统决策失败。
+	2. 这个过程就是把整个系统划分成各个子系统或者模块，每个子系统能够有那个角色来访问。
+	3. 如果一个用户想拥有整个系统的访问权限，那把所有的角色都分配给他。
+
+二. 1. 在开发过程中，每开发一个page，request等都要给他能访问它的role。如果是没有role就是每个人都可以访问（default）。
+	e.g. 
+	role1教室管理员：分配教室给院系，给教室命名
+	role2系统管理员：给用户分配角色，数据管理
+	role3学生：查看成绩
+	role4教师：指定考试，选辅导老师
+
+	2. 角色也能决定把一个页面能够返回给谁。
+
+
+三. 1. 系统开发完成后，后台role 分配，每个user 和group都可以有多个role。
+
+因此对每个登录的user，都要主动加载它的roles
+<many-to-one name="roles" lazy="false" class="com.sprintt1.entity.Roles" >

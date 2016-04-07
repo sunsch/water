@@ -1,0 +1,135 @@
+
+a:link, a:visited, .Acolor {
+color:#0068B7;
+text-decoration:underline;
+}
+a:hover {
+color:#0075CD;
+text-decoration:underline;
+}
+.Btn, .ABtn {
+background-color:#FFFFFF;
+border:1px solid #72A1BD;
+}
+.BtnHv, .ABtn:hover {
+background-color:#FFFFFF;
+border:1px solid #A2904D;
+}
+.Ipt, .IptOnF {
+border:1px solid #A8B7C0;
+}
+.Hr {
+border-bottom:1px solid #F6F9FB;
+border-top:1px solid #D1D8DB;
+}
+.HrSub {
+border-bottom:medium none;
+border-top:1px solid #D1D8DB;
+}
+.HrSub2 {
+border-bottom:1px solid #EDEDED;
+border-top:medium none;
+}
+.Tips_Nml_C {
+background-color:#F6FAFD;
+border:1px solid #E0E5E5;
+}
+.gCBgWp {
+background-color:#F6FAFD;
+border-bottom:1px solid #E0E7ED;
+border-top:1px solid #EFF4F7;
+}
+.gSW_Con_WpIn, .gSW_Footer_WpIn {
+border:1px solid #608DA8;
+}
+.gSW_Con_WpIn {
+border-bottom:medium none;
+border-top:medium none;
+}
+.gSW_Footer_Wp {
+background-color:#F6FAFD;
+}
+.gSW_Footer_WpIn {
+border-top:medium none;
+}
+.gSW_Footer_WpIn .HrSub {
+border-top-color:#CBDDE5;
+}
+.F1Img, .HeadWpInner, .SchBtn, .SchMenuBtn, .SidebarBdWp, .BigBtnWp a.aShouXIN, .BigBtnWp a.aXieXIN, .BigBtnWp, .PanelCon li.On a.fileItem, .Sb_Line {
+background-image:url("../image/error/f1.gif");
+background-repeat:no-repeat;
+}
+.F2Img, .HeadWp, .Btn, .BtnHv, .ABtn {
+background-image:url("../image/error/f2.gif");
+background-repeat:repeat-x;
+}
+.IcoImg, .icoOpCls, .icoCls, .icoTips, .icoIbx, .icoInfo {
+background-image:url("../image/error/ico.gif");
+background-repeat:no-repeat;
+}
+.IcoLoading {
+background-image:url("../image/error/loading.gif");
+background-position:0 0;
+background-repeat:no-repeat;
+}
+.HeadThemeWp, .SidebarThemeWp {
+background-image:url("../image/error/theme.gif");
+background-position:0 0;
+background-repeat:no-repeat;
+}
+.g163logo {
+}
+.g126Logo {
+}
+.gYeahLogo {
+}
+.g188Logo {
+}
+.gVip163Logo {
+}
+.SidebarBdWp {
+background-repeat:repeat-y;
+}
+.HeadThemeWp {
+background-position:right 0;
+}
+.SidebarThemeWp {
+background-position:0 -192px;
+}
+.Cmp_tip table tr td.Cmp_TipOn, .Cmp_RTcont a:hover {
+background-color:#E6F3FB;
+}
+.Cmp_att {
+background-color:#E7F1FA;
+}
+.Cmp_tip table tr td b {
+color:#0068B7;
+}
+.ctn {
+background-color:#A5DD3D;
+}
+.Cmp_editor_wide, .Cmp_editor, .Cmp_table td input.Ipt, .Cmp_table td textarea.Ipt {
+border-color:#839BB1;
+}
+.Cmp_txlbox, .Cmp_TBtit a {
+border-color:#C9D3DB;
+}
+.Cmp_TBtit a {
+background-color:#F6FAFD;
+}
+.Cmp_RHcont a.on, .Cmp_RHcont a.on:hover {
+background-color:#FFEDA1;
+border-color:#FFC467;
+}
+.Cmp_cpt_txlW {
+border-color:#C9D3DB;
+}
+.CMPth_lbtab {
+background-color:#F9FCFE;
+border-bottom-color:#E0EBF5;
+border-top-color:#E0EBF5;
+}
+.CMPth_lbtab th {
+background-color:#F3F9FC;
+border-bottom-color:#E4EBF0;
+}

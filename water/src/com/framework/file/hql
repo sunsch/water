@@ -1,0 +1,8 @@
+
+from Classes c 【left】 join c.classcourseRelations r where r.courses=1
+
+from Users u join u.urRelations r where r.roles=3 
+this will return a list 
+each element in the list is a object[]
+object[0]=users
+object[1]=urRelations

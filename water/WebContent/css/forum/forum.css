@@ -1,0 +1,71 @@
+@CHARSET "UTF-8";
+
+.articleReview
+{
+	background: url("reviewbg.png") repeat-y scroll left center transparent;
+    border: 1px solid #B1D4E8;
+    margin-bottom: 10px;
+}
+.authorInfo {
+    float: left;
+    width: 90px;
+}
+
+.authorInfo .name {
+    padding: 5px 0 0;
+    position: relative;
+    text-align: center;
+    z-index: 1;
+}
+.authorInfo .name a {
+    color: #1E50A2;
+    font-weight: bold;
+}
+.authorInfo .avator {
+    margin: 3px 0 5px;
+    text-align: center;
+}
+.authorInfo .info {
+    line-height: 180%;
+    padding: 0 5px;
+}
+
+.archiveBody {
+    margin: 0 0 0 100px;
+}
+.articleTools {
+    border-bottom: 1px solid #B1D4E8;
+    height: 23px;
+    line-height: 23px;
+    margin: 0 5px 10px 0;
+    position: relative;
+}
+
+.right {
+    float: right;
+}
+.articleCont .clip {
+    font-size: 14px;
+    overflow: hidden;
+    text-align: left;
+    width: 99%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

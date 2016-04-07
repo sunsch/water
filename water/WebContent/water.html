@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>在线水资源与客户关系管理系统</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+ 
+	
+<liNK rel="stylesheet" type="text/css" href="css/jquery-ui-1.10.4.custom/jquery-ui-1.10.4.custom.min.css">
+<liNK rel="stylesheet" type="text/css" href="css/layout/layout-default-latest.css">
+<link rel="stylesheet" type="text/css" href="js/footable/footable.standalone.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery/pagination.css"/>
+<link rel="stylesheet" href="css/framework/framework.css">
+
+</head>
+<body>
+
+<div id='center_div_id' class="ui-layout-center" >
+
+</div>
+<div id='north_div_id' class="ui-layout-north" style='height:100px;'>
+		<div style="width:100%;height:100%;font-size:13px;border:0px solid;margin:0 auto;margin-top:0px;margin-bottom: 0px;background: url(&quot;/water/image/login/light_blue_bg.png&quot;) repeat-x scroll center 0pt transparent;">
+			<div style="border:0px solid;float:left;position:relative;">
+				<a title="" href="www.jykc.net/exam/login/home.jsp">
+					<img alt='' id='logo_img_id' style="height:50px;width:50px;border:0 none;margin:0;outline:0 none;padding:0;"  src="http://www.jykc.net/exam/image/logo/icon/kuaicheicon.png" /><!-- http://i2.dpfile.com/s/res/2010xmas.png -->
+				</a>
+			</div>
+			<div style="width:450px;padding-top:10px;padding-left:10px;border:0px solid;float:left;">
+				<div style='padding-bottom:10px;'><a id='schoolnameid' title="" href="/exam/login/home.jsp" style="display:none;margin-right:0px;font-weight:bold;font-size:14px;text-decoration:none;">在线水资源与客户关系管理系统</a></div>
+				<a id='defaulttitleid' title="" href="/exam/login/home.jsp" style="margin-right:0px;font-weight:bold;font-size:20px;text-decoration:none;">在线水资源与客户关系管理系统</a>
+			</div>
+			<div style="width:200px;padding-top:20px;border:0px solid;float:right;">
+				<a style="text-decoration:none;font-weight:bold;" href="/exam/login/beta1/login.htm">登录|</a>
+				<a onclick="open_dialog('quick_reg_dialog');return false;" style="margin-right:0px;text-decoration:none;font-weight:bold;" href="/exam/register/reg.jsp">注册|</a>
+				<a href="javascript:;" onclick="javascript:AddFavorite(window.location,document.title);" style="text-decoration:none;font-weight:bold;" >加入收藏|</a>
+				<a href="javascript:;" onclick="javascript:SetHome(this,window.location);" style="text-decoration:none;font-weight:bold;">设为首页</a>
+			</div>
+	</div>
+		
+</div>
+
+
+<div id='west_div_id' class="ui-layout-west" style='background: #eee;'>
+			<div id="accordion" style='height: 100px;'>
+			</div>
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="js/jquery/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="js/jqueryui/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="js/footable/footable.min.js"></script>
+<script type="text/javascript" src="js/layout/jquery.layout-latest.min.js"></script>     
+<script type="text/javascript" src="js/jquery.mypagination.js"></script>
+
+<script type="text/javascript" src="js/framework/common_utils.js"></script>
+<script type="text/javascript" src="js/framework/initialize-ui.js"></script>
+
+
+<script type="text/javascript">
+		
+$(document).ready(function () {
+
+	initialize_layout();
+	initialize_left_menu();
+	initialize_tooltips();
+});
+
+</script>
+
+</html>

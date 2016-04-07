@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2010-6-1 15:25:51 by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.framework.auto.basicentity.Roles" table="roles"  catalog="exam">
+        <id name="rid" type="int">
+            <column name="rid" />
+			<generator class="native" />
+        </id>
+        <property name="rname" type="string">
+            <column name="rname" length="50" not-null="true" />
+        </property>
+        <property name="rdescription" type="string">
+            <column name="rdescription" length="200" />
+        </property>
+        <property name="optdate" type="timestamp">
+            <column name="optdate" length="23" />
+        </property>
+        <property name="comments" type="string">
+            <column name="comments" length="200" />
+        </property>
+        <set name="urRelations" inverse="true">
+            <key>
+                <column name="rid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.UrRelation" />
+        </set>
+        <set name="operationses" inverse="true">
+            <key>
+                <column name="rid" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.Operations" />
+        </set>
+        <set name="grRelations" inverse="true">
+            <key>
+                <column name="rid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.GrRelation" />
+        </set>
+    </class>
+</hibernate-mapping>

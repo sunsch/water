@@ -1,0 +1,16 @@
+2.二级缓存:(有时称为SessionFactory Level Cache)
+
+       Hibernate本身并未提供二级缓存的产品化实现(只提供了一个基于HashTable的简单缓存以供调试),这里我使用的是第三方缓存组件:EHcache.Hibernate的二级缓存实现需要进行以下配置(Hibernate3):
+
+       首先在hibernate.cfg.xml内添加:
+
+
+
+<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>   
+<property name="hibernate.cache.use_query_cache">true</property>   
+
+然后在映射文件中添加:
+<cache usage="read-only"/>   
+
+如果不设置“查询缓存”，那么hibernate只会缓存使用load()方法获得的单个持久化对象，如果想缓存使用findall()、list()、 Iterator()、createCriteria()、createQuery()等方法获得的数据结果集的话，就需要设置
+hibernate.cache.use_query_cache true 才行 

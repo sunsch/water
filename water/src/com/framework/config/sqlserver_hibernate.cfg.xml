@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory name="SessionFactory">
+    <!-- 
+    <property name="hibernate.connection.driver_class">com.microsoft.jdbc.sqlserver.SQLServerDriver</property>
+    <property name="hibernate.connection.url">jdbc:microsoft:sqlserver://localhost;DatabaseName=lattice;SelectMethod=cursor</property>
+     -->
+        <property name="hibernate.connection.driver_class">net.sourceforge.jtds.jdbc.Driver</property>
+        <property name="hibernate.connection.password">passw0rd</property>
+        <property name="hibernate.connection.url">jdbc:jtds:sqlserver://localhost/exam;DatabaseName=exam;SelectMethod=cursor</property>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.connection.username">admin</property>
+      <property name="hibernate.format_sql">true</property>
+     <property name="connection.autocommit">false</property>
+      <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
+     
+      <!-- configuration pool via c3p0--> 
+    <property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+	<property name="c3p0.acquire_increment">10</property> 
+	<property name="c3p0.idle_test_period">100</property> <!-- seconds --> 
+	<property name="c3p0.max_size">10</property> 
+	<property name="c3p0.max_statements">1000</property> 
+	<property name="c3p0.min_size">1</property> 
+	<property name="c3p0.timeout">1200</property> <!-- seconds --> 
+
+	<property name="hibernate.cache.use_second_level_cache">true</property> 
+	<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property> 
+	<!-- 开启查询缓存，个别查询肯定应该开启查询缓存。取值，true|false。 -->  
+	<property name="hibernate.cache.use_query_cache">true</property> 
+      
+      <!-- 
+       <property name="current_session_context_class">thread</property>
+       --> 
+       	
+       	<!-- 
+       	<mapping resource="com/exam/entity/Studentmodule.hbm.xml"/>
+		<mapping resource="com/exam/entity/StudentmoduleSplit.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/KnowledgeexerciseSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/KnowledgeexercisedetailSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/ComposeexerciseSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/ComposeexercisedetailSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/ExaminationSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/ExaminationdetailSplit.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Roles.hbm.xml"/>
+		<mapping resource="com/exam/entity/Groups.hbm.xml"/>
+		<mapping resource="com/exam/entity/GrRelation.hbm.xml"/>
+		<mapping resource="com/exam/entity/RichItems.hbm.xml"/>
+		<mapping resource="com/exam/entity/Operations.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/UgRelation.hbm.xml"/>
+		<mapping resource="com/exam/entity/UrRelation.hbm.xml"/>
+       	 -->
+		
+		
+		<mapping resource="com/exam/entity/Knowledgeexercise.hbm.xml"/>
+		<mapping resource="com/exam/entity/Knowledgeexercisedetail.hbm.xml"/>
+		<mapping resource="com/exam/entity/Examination.hbm.xml"/>
+		<mapping resource="com/exam/entity/Examinationdetail.hbm.xml"/>
+		<mapping resource="com/exam/entity/Composeexercise.hbm.xml"/>
+		<mapping resource="com/exam/entity/Composeexercisedetail.hbm.xml"/>
+		<mapping resource="com/exam/entity/Exerciseoptions.hbm.xml"/>
+		<mapping resource="com/exam/entity/ClasscourseRelation.hbm.xml"/>
+		<mapping resource="com/exam/entity/Classes.hbm.xml"/>
+		<mapping resource="com/exam/entity/Courses.hbm.xml"/>
+		<mapping resource="com/exam/entity/CourseteacherRelation.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Items.hbm.xml"/>
+		<mapping resource="com/exam/entity/Knowledges.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/SchoolusercourseRelation.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Testpaper.hbm.xml"/>
+		<mapping resource="com/exam/entity/Testpaperdetail.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Userlog.hbm.xml"/>
+		<mapping resource="com/exam/entity/Userlog1.hbm.xml"/>
+		<mapping resource="com/exam/entity/Users.hbm.xml"/>
+		<mapping resource="com/exam/entity/Ppt.hbm.xml"/>
+		<mapping resource="com/exam/entity/Pptcatalog.hbm.xml"/>
+		<mapping resource="com/exam/entity/SchooluserteacherRelation.hbm.xml"/>
+		<mapping resource="com/exam/entity/Charge.hbm.xml"/>
+		<mapping resource="com/exam/entity/TeacherClassRelation.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Exercisedetail.hbm.xml"/>
+		<mapping resource="com/exam/entity/ExercisedetailSplit.hbm.xml"/>
+		<mapping resource="com/exam/entity/Exercises.hbm.xml"/>
+		<mapping resource="com/exam/entity/ExercisesSplit.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/Knowledgedesc.hbm.xml"/>
+		<mapping resource="com/exam/entity/AccountClasscourseRelation.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/ForumTopic.hbm.xml"/>
+		<mapping resource="com/exam/entity/ForumReply.hbm.xml"/>
+		
+		<mapping resource="com/exam/entity/ItemComment.hbm.xml"/>
+		
+        <!-- MAPPING END HERE. Please do NOT delete or modify this comment, it will be used for framwork.  -->
+    
+ </session-factory>
+</hibernate-configuration>

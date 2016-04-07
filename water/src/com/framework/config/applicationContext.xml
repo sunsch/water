@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	  
+   <bean id="sessionFactory"
+        class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="configLocation"
+            value="classpath:com/framework/config/hibernate.cfg.xml">
+        </property>
+    </bean>
+    
+    <bean id="defaultProxyObject" class="com.exam.entity.Users"></bean>
+
+  
+  
+
+    <bean id="UserlogDao" class="com.exam.entity.UserlogDao" >
+      <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+      </property>
+    </bean>
+    <bean id="UsersDao" class="com.exam.entity.UsersDao" >
+      <property name="sessionFactory">
+    		<ref bean="sessionFactory"  />
+      </property>
+    </bean>
+   
+     <!--ENTITY DAO END HERE. Please do NOT delete or modify this comment, it will be used for framwork.  -->
+    
+	
+     
+       <!--declare the transaction-->
+        <bean   id= "transactionManager"     class= "org.springframework.orm.hibernate3.HibernateTransactionManager "> 
+        	<property   name= "sessionFactory"> 
+        	<ref   bean= "sessionFactory"   /> 
+        	</property> 
+        </bean> 
+        
+    <bean id="homeTxProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="target" ref="defaultProxyObject"></property> 
+        
+        <property name="transactionAttributes">
+        <props>
+    		<prop key="*">PROPAGATION_REQUIRED</prop>
+    		<prop key="save*">PROPAGATION_REQUIRED,-NumberFormatException</prop>
+    		<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>  
+    		<prop key="is*">PROPAGATION_REQUIRED,readOnly</prop>         
+    		<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>      
+         </props>
+        </property>
+    </bean>
+
+	
+  
+ 	
+ 	<bean id="UserlogDaoTxProxy" parent="homeTxProxy">
+       <property name="transactionManager"> 
+    		<ref bean="transactionManager"  />
+      </property>
+		<property name="target" ref="UserlogDao"></property> 
+  </bean>
+ 	<bean id="UsersDaoTxProxy" parent="homeTxProxy">
+       <property name="transactionManager"> 
+    		<ref bean="transactionManager"  />
+      </property>
+		<property name="target" ref="UsersDao"></property> 
+  </bean>
+ 	
+	 <!--TRANSACTION PROXY END HERE. Please do NOT delete or modify this comment, it will be used for framwork.  -->
+    
+    
+     
+    
+</beans>  
+

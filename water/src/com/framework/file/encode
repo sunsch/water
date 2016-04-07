@@ -1,0 +1,386 @@
+在content type里面设定只是一个显示的问题
+
+			fi=new FileInputStream(fileName);
+			is=new InputStreamReader(fi,"UTF-8");
+			br = new BufferedReader(is);
+			
+			fo=new FileOutputStream(fileName);
+			os=new OutputStreamWriter(fo,"UTF-8");
+			pw=new PrintWriter(fo);
+			
+			
+fu.write(System.getProperty("file.encoding")+new String("中国".getBytes("UTF-8"), "GBK"));
+
+tomcat默认全部都是用ISO-8859-1编码,不管你页面用什么显示,Tomcat最终还是会替你将所有字符转做ISO-8859-1.那么,当在另目标页面再用GBK翻译时就会将本来错的编码翻译成GBK的编码,这时的文字会乱码.
+
+所以需要先将得到"字符"(不管是什么)都先用字节数组表示,且使用ISO-8859-1进行翻译,得到一个在ISO-8859-1编码环境下的字节数组.例如:AB表示成[64,65].然后再用GBK编码这个数组,并翻译成一个字符串.
+
+那么我们可以得到一个编码转换的过程
+假设:GBK码("你")->URLencode后变成->(%3F%2F)->Tomcat自动替你转一次ISO- 8859-1->得到( 23 43 68 23 42 68 每一个符号表示为ISO-8859-1中的一个编码)->
+接收页面--->再转一次为ISO-8859-1的Byte数组 [23,43,68,23,42,68]--->用GBK再转为可读的文字--->
+(%3F%2F"---->转为("你")
+
+
+  Java String是Java API中最常用的类，本文和大家谈谈String类的内部原理，同时描述ISO-8859-1字符集在字符串处理中的独特用处。 
+
+Java字符串的内部编码
+      String类内部管理着一个char类型的数组，Java API是这样描述char基本类型的：
+      char 数据类型（和 Character 对象封装的值）基于原始的 Unicode 规范，将字符定义为固定宽度的 16 位实体。
+这一点我们可以通过下面的语句加以证实：
+
+                                 System.out.println(Character.SIZE);  // 结果为16 
+
+      根据String类的构造方法，我们可以这样定义字符串：
+
+                                 String str =  "abc" ;  
+
+      上句代码等效于： 
+
+                                 char  data[] = { 'a' ,  'b' ,  'c' };  
+
+                                 String str = new  String(data); 
+
+       同时，char基本类型与byte、short、int、long一样可以用数值表示。所以上述代码等效于：
+
+                                 char  data[] = { 0x61 ,  0x62 ,  0x63 }; 
+
+                                 String str = new  String(data); 
+
+       需要注意的是，char基本类型始终使用16位即两个字节表示一个字符，即使这个字符的Unicode值小于0xFF（如ASCII码）。对于Unicode值大于0xFF的字符，如“中国”二字的Unicode编码分别为\u4E2D和\u56FD，我们可以这样创建：
+
+                                  char  data[] = { '\u4E2D' ,  '\u56FD' };  
+
+                                  String str = new  String(data);  
+
+        当然也可以这样创建：
+
+                                  char  data[] = { 0x4E2D ,  0x56FD };  
+
+                                  String str = new  String(data); 
+
+       通过上面的描述可以明确两个要点：
+
+       (1)字符串对象中的每一个元素始终占据两个字节长度，一个或两个元素（增补字符占据两个元素）表示一个字符。
+       (2)字符串对象中的每一个元素都使用Unicode字符集进行编码。 
+
+字符集（Charset）与字节化字符数据
+      在出现 Unicode 规范之前，计算机在处理字符串的问题上经历过ASCII和ANSI编码两个阶段，在ASCII时代，计算机只能处理英文数字以及几个基本符号，当时使用的是单字节字符集（SBCS） 。
+      各国为了能在计算机上处理本国的文字，制订了相应的国家标准，规定了各自的ANSI编码。如中文简体使用GBK标准；中文繁体使用BIG5标准；日文使用Shift_JIS标准。在ANSI编码时代，计算机使用多字节字符集（MBCS） 处理文字。如“中国ABC”，在GB2312标准中，“中国”两个字符分别使用两个字节表示，而“ABC”三个英文字符又分别使用一个字节表示。各国文字的ANSI编码互不通用，不能使用一种ANSI编码表达多个国家的文字。
+      为了文字交流的顺畅，也就是说为了达到在一个文本当中既可以有中文简体字存在，也可以有中文繁体字存在的目的。国际组织根据各国语言的特点，使用两个字节的数据量将大部分国家的文字信息整合到一个字符集中，这就是Unicode编码，也称万国码。关于Unicode编码的特点，前文已经描述，那就是使用双字节字符集（DBCS） 处理文字。
+
+ 
+
+      在Java中，使用字节数组保存不同字符集的字符值，如使用ASCII字符集保存“abc”的方法如下：
+
+Java代码 
+// 使用ASCII编码的“abc”     
+byte[] ascBytes = {(byte)0x61, (byte)0x62, (byte)0x63};    
+
+// 使用ASCII编码的“abc”  
+byte[] ascBytes = {(byte)0x61, (byte)0x62, (byte)0x63};        使用GBK字符集保存“中国”二字的方法如下：
+
+Java代码 
+// 使用GBK编码的“中国”     
+byte[] gbkBytes = {(byte)0xD6, (byte)0xD0, (byte)0xB9, (byte)0xFA};    
+
+// 使用GBK编码的“中国”  
+byte[] gbkBytes = {(byte)0xD6, (byte)0xD0, (byte)0xB9, (byte)0xFA};        当然我们也可以使用Unicode字符集保存“中国”二字。如：
+
+Java代码 
+// 使用Unicode编码的“中国”     
+byte[] unicodeBytes = {(byte)0x4E, (byte)0x2D, (byte)0x56, (byte)0xFD};    
+
+// 使用Unicode编码的“中国”  
+byte[] unicodeBytes = {(byte)0x4E, (byte)0x2D, (byte)0x56, (byte)0xFD};        一个特殊的字符集UTF-8是与Unicode规范对应的多字节表示的字符集。如“中”字的UTF-8编码为“0xE4, 0xB8, 0xAD”三个字节。
+
+      在这里，将这些与具体字符集相对应的字节化的数据流称为字节化字符数据 ，与字符串对象形成鲜明对照的是，字符串对象的最小单位是两个字节而字节化字符数据的最小单位则是一个字节。由此我们可以明确另外两个要点：
+
+      (1) 字节化字符数据中的每一个元素始终占据一个字节长度，一个或多个元素表示一个字符。
+      (2) 字节化字符数据必须与一个字符集相对应。 
+
+字节化字符数据与字符串对象的互换
+      在Java程序运行过程中，字符串对象始终以Unicode编码方式保存在内存中，但将字符串对象保存到持久化资源（文件或数据库）或将其通过网络传输时，通常是以字节化字符数据的方式进行处理。这样就要求Java API必须提供两者互换的功能。事实上这一功能在String类及Charset类中已经提供。
+一方面我们可以利用String类的getBytes()方法返回不同字符集的字节化字符数据，其本质是从Unicode字符集编码向其它字符集编码转换的过程。例如：
+
+Java代码 
+//since JDK 6.0   
+public static void main(String[] args) {     
+    
+     String str = "中国";     
+     printBytes("中国的UNICODE编码：",         
+     str.getBytes(Charset.forName("unicode")));     
+     printBytes("中国的GBK编码：",    
+     str.getBytes(Charset.forName("GBK")));     
+     printBytes("中国的UTF-8编码：",    
+     str.getBytes(Charset.forName("UTF-8")));     
+}     
+  
+public static void printBytes(String title, byte[] data) {     
+     System.out.println(title);     
+     for (byte b : data) {     
+         System.out.print("0x" + toHexString(b) + " ");     
+     }     
+     System.out.println();        
+}     
+     
+public static String toHexString(byte value) {     
+     String tmp = Integer.toHexString(value & 0xFF);     
+     if (tmp.length() == 1) {     
+         tmp = "0" + tmp;     
+     }     
+     return tmp.toUpperCase();     
+}    
+
+//since JDK 6.0
+public static void main(String[] args) {  
+ 
+     String str = "中国";  
+     printBytes("中国的UNICODE编码：",      
+     str.getBytes(Charset.forName("unicode")));  
+     printBytes("中国的GBK编码：", 
+     str.getBytes(Charset.forName("GBK")));  
+     printBytes("中国的UTF-8编码：", 
+     str.getBytes(Charset.forName("UTF-8")));  
+}  
+
+public static void printBytes(String title, byte[] data) {  
+     System.out.println(title);  
+     for (byte b : data) {  
+         System.out.print("0x" + toHexString(b) + " ");  
+     }  
+     System.out.println();     
+}  
+  
+public static String toHexString(byte value) {  
+     String tmp = Integer.toHexString(value & 0xFF);  
+     if (tmp.length() == 1) {  
+         tmp = "0" + tmp;  
+     }  
+     return tmp.toUpperCase();  
+}       上例的输出结果为：
+
+Html代码 
+中国的UNICODE编码：   
+0xFE 0xFF 0x4E 0x2D 0x56 0xFD   
+中国的GBK编码：   
+0xD6 0xD0 0xB9 0xFA   
+中国的UTF-8编码：   
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD   
+
+中国的UNICODE编码：
+0xFE 0xFF 0x4E 0x2D 0x56 0xFD
+中国的GBK编码：
+0xD6 0xD0 0xB9 0xFA
+中国的UTF-8编码：
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD       需要注意的是，从字符串对象中取出的Unicode编码的字节化字符数据时，其开始部分存在一个BOM（ByteOrderMark） ，一般情况下，该 BOM值为“0xFE 0xFF”，即大端字节序（BIG_ENDIAN）。如果BOM值为“0xFF 0xFE”则为小端字节序（LITTLE_ENDIAN）。
+
+ 
+
+      另一方面也可以利用String类的构造方法根据不同字符集的字节化字符数据产生一个字符串对象，其本质是从其它字符集编码向Unicode字符集编码转换的过程。例如：
+
+Java代码 
+byte[] unicodeBytes = {(byte)0x4E, (byte)0x2D, (byte)0x56, (byte)0xFD};     
+System.out.println(new String(unicodeBytes, Charset.forName("unicode")));     
+      
+byte[] gbkBytes = {(byte)0xD6, (byte)0xD0, (byte)0xB9, (byte)0xFA};     
+System.out.println(new String(gbkBytes, Charset.forName("GBK")));     
+             
+byte[] utf8Bytes = {(byte)0xE4, (byte)0xB8, (byte)0xAD, (byte)0xE5, (byte)0x9B, (byte)0xBD};     
+System.out.println(new String(utf8Bytes, Charset.forName("UTF-8")));    
+
+byte[] unicodeBytes = {(byte)0x4E, (byte)0x2D, (byte)0x56, (byte)0xFD};  
+System.out.println(new String(unicodeBytes, Charset.forName("unicode")));  
+   
+byte[] gbkBytes = {(byte)0xD6, (byte)0xD0, (byte)0xB9, (byte)0xFA};  
+System.out.println(new String(gbkBytes, Charset.forName("GBK")));  
+          
+byte[] utf8Bytes = {(byte)0xE4, (byte)0xB8, (byte)0xAD, (byte)0xE5, (byte)0x9B, (byte)0xBD};  
+System.out.println(new String(utf8Bytes, Charset.forName("UTF-8")));   
+
+      上例三个输出语句均输出“中国”二字。
+
+      上述两种转换过程，特别是Unicode字符集编码向其它字符集编码的转换过程中会出现转换失败的现象。转换失败时该Unicode码自动用0x3F代替。例如：
+
+Java代码 
+public static void main(String[] args) {     
+    
+     String str = "中国";     
+     printBytes("中国的BIG5编码：",    
+     str.getBytes(Charset.forName("BIG5")));     
+}     
+    
+public static void printBytes(String title, byte[] data) {     
+     // 同上例     
+}    
+
+public static void main(String[] args) {  
+ 
+     String str = "中国";  
+     printBytes("中国的BIG5编码：", 
+     str.getBytes(Charset.forName("BIG5")));  
+}  
+ 
+public static void printBytes(String title, byte[] data) {  
+     // 同上例  
+}         上例的输出结果为：
+
+Html代码 
+中国的BIG5编码：   
+0xA4 0xA4 0x3F   
+
+中国的BIG5编码：
+0xA4 0xA4 0x3F        其中“国”由于没有繁体中文BIG5字符集对应的编码值，所以会用0x3F表示。
+
+特殊的字符集（ISO-8859-1）
+ISO-8859-1是单字节字符集，是ASCII字符集的补充。通常情况下使用ISO-8859-1字符集进行字符串对象与字节化字符数据的互换操作与前述完全一致。例如：
+
+Java代码 
+public static void main(String[] args) {     
+     // 字符串“abc”     
+     byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };     
+     String str = new String(bytes, Charset.forName("ISO-8859-1"));     
+     printBytes("ISO-8859-1编码：", str.getBytes(Charset.forName("ISO-8859-1")));     
+     printBytes("UNICODE编码：",    
+     str.getBytes(Charset.forName("UNICODE")));             
+}     
+     
+public static void printBytes(String title, byte[] data) {     
+     // 同上     
+}    
+
+public static void main(String[] args) {  
+     // 字符串“abc”  
+     byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };  
+     String str = new String(bytes, Charset.forName("ISO-8859-1"));  
+     printBytes("ISO-8859-1编码：", str.getBytes(Charset.forName("ISO-8859-1")));  
+     printBytes("UNICODE编码：", 
+     str.getBytes(Charset.forName("UNICODE")));          
+}  
+  
+public static void printBytes(String title, byte[] data) {  
+     // 同上  
+}       上例的输出结果为：
+
+Java代码 
+ISO-8859-1编码：   
+0x61 0x62 0x63  
+UNICODE编码：   
+0xFE 0xFF 0x00 0x61 0x00 0x62 0x00 0x63   
+
+ISO-8859-1编码：
+0x61 0x62 0x63
+UNICODE编码：
+0xFE 0xFF 0x00 0x61 0x00 0x62 0x00 0x63       通过此例可以看出，从ISO-8859-1字符集转换成Unicode字符集的过程是将字节化字符数据中的每个一个byte类型元素直接保存成一个char类型元素。也就是说下面的代码：
+
+Java代码 
+byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };     
+String str = new String(bytes, Charset.forName("ISO-8859-1"));    
+
+byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };  
+String str = new String(bytes, Charset.forName("ISO-8859-1"));        等效于：
+
+Java代码 
+byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };     
+char[] tmp = new char[bytes.length];     
+for (int i=0; i<bytes.length; i++) {     
+    tmp[i] = (char)bytes[i];     
+}     
+String str = new String(tmp);   
+
+byte[] bytes = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };  
+char[] tmp = new char[bytes.length];  
+for (int i=0; i<bytes.length; i++) {  
+    tmp[i] = (char)bytes[i];  
+}  
+String str = new String(tmp);       需要注意的是，ISO-8859-1到Unicode的转换过程是对编码值为0x00 - 0xFF之间都有效的一种转换。在ISO-8859-1字符集中，0x00-0x1F、0x7F、0x80-0x9F没有定义。我们可以使用其中几个无效编码进行测试：
+
+Java代码 
+public static void main(String[] args) {     
+     // 无效的ISO-8859-1编码     
+     byte[] bytes = { (byte) 0x00, (byte) 0x1A, (byte) 0x7F, (byte) 0x93 };     
+    String str = new String(bytes, Charset.forName("ISO-8859-1"));     
+    printBytes("ISO-8859-1编码：", str.getBytes(Charset.forName("ISO-8859-1")));     
+    printBytes("UNICODE编码：", str.getBytes(Charset.forName("UNICODE")));             
+}     
+     
+public static void printBytes(String title, byte[] data) {     
+    // 同上     
+}    
+
+public static void main(String[] args) {  
+     // 无效的ISO-8859-1编码  
+     byte[] bytes = { (byte) 0x00, (byte) 0x1A, (byte) 0x7F, (byte) 0x93 };  
+    String str = new String(bytes, Charset.forName("ISO-8859-1"));  
+    printBytes("ISO-8859-1编码：", str.getBytes(Charset.forName("ISO-8859-1")));  
+    printBytes("UNICODE编码：", str.getBytes(Charset.forName("UNICODE")));          
+}  
+  
+public static void printBytes(String title, byte[] data) {  
+    // 同上  
+}        上例的输出结果为：
+
+Java代码 
+ISO-8859-1编码：   
+0x00 0x1A 0x7F 0x93  
+UNICODE编码：   
+0xFE 0xFF 0x00 0x00 0x00 0x1A 0x00 0x7F 0x00 0x93   
+
+ISO-8859-1编码：
+0x00 0x1A 0x7F 0x93
+UNICODE编码：
+0xFE 0xFF 0x00 0x00 0x00 0x1A 0x00 0x7F 0x00 0x93       根据这一特点，我们可以总结出最后一个要点：
+
+      利用ISO-8859-1字符集，我们可以将任何一个字节数组无损保存到字符串对象中。 
+
+ 
+
+      也就是说，可以利用这一特点将字节化字符数据的原始字节数据（而不是经过Unicode字符集转换之后的数据）直接保存在字符串对象中。反之也可以从一个经过ISO-8859-1编码的字符串对象中取出原始字节数据。例如：
+
+Java代码 
+public static void main(String[] args) {     
+    byte[] utf8Bytes = {(byte)0xE4, (byte)0xB8, (byte)0xAD, (byte)0xE5, (byte)0x9B, (byte)0xBD};     
+    printBytes("原始字节流：" , utf8Bytes);     
+         
+   // ISO-8859-1编码过程     
+   // 保存原始字节数据流（不经过Unicode编码）到字符串对象     
+   String isoStr = new String(utf8Bytes, Charset.forName("ISO-8859-1"));     
+         
+   // ISO-8859-1解码过程     
+   // 从字符串对象中取得与utf8Bytes内容完全相等的原始字节数据流     
+   byte[] tmp = isoStr.getBytes(Charset.forName("ISO-8859-1"));     
+   printBytes("转换字节流：" , tmp);     
+}     
+     
+public static void printBytes(String title, byte[] data) {     
+    // 同上     
+}    
+
+public static void main(String[] args) {  
+    byte[] utf8Bytes = {(byte)0xE4, (byte)0xB8, (byte)0xAD, (byte)0xE5, (byte)0x9B, (byte)0xBD};  
+    printBytes("原始字节流：" , utf8Bytes);  
+      
+   // ISO-8859-1编码过程  
+   // 保存原始字节数据流（不经过Unicode编码）到字符串对象  
+   String isoStr = new String(utf8Bytes, Charset.forName("ISO-8859-1"));  
+      
+   // ISO-8859-1解码过程  
+   // 从字符串对象中取得与utf8Bytes内容完全相等的原始字节数据流  
+   byte[] tmp = isoStr.getBytes(Charset.forName("ISO-8859-1"));  
+   printBytes("转换字节流：" , tmp);  
+}  
+  
+public static void printBytes(String title, byte[] data) {  
+    // 同上  
+}         上例的输出结果为：
+
+Html代码 
+原始字节流：   
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD   
+转换字节流：   
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD   
+
+原始字节流：
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD
+转换字节流：
+0xE4 0xB8 0xAD 0xE5 0x9B 0xBD        这种通过字符串对象保存原始字节数据的方法被很多地方所使用。最常见的就是Java WEB应用中Web服务器对来自于服务器的表单数据的处理，关于这方面的详细说明请参考 如何解决Java WEB应用中的乱码问题 。
+

@@ -1,0 +1,78 @@
+I removed an object from a collection mapped with cascade="all" but the object was not deleted!
+cascade="all" cascades the delete() operation from parent to child. 
+If this is a one-to-many association, try using cascade="all,delete-orphan".
+Another solution is to model your child objects as composite elements 
+(a kind of value type) rather than entities. Value types are always persisted or 
+removed along with their parent entity. So you would use a <composite-element> 
+mapping for the element class instead of a <class> mapping.. 
+
+. 传播性持久化(transitive persistence)
+对每一个对象都要执行保存，删除或重关联操作让人感觉有点麻烦，尤其是在处理许多彼此关联的对象的时候。 一个常见的例子是父子关系。考虑下面的例子: 
+
+如果一个父子关系中的子对象是值类型(value typed)（例如，地址或字符串的集合）的，他们的生命周期会依赖于父对象，可以享受方便的级联操作(Cascading)，不需要额外的动作。 父对象被保存时，这些值类型(value typed)子对象也将被保存；父对象被删除时，子对象也将被删除。 这对将一个子对象从集合中移除是同样有效：Hibernate会检测到，并且因为值类型(value typed)的对象不可能被其他对象引用，所以Hibernate会在数据库中删除这个子对象。 
+
+现在考虑同样的场景，不过父子对象都是实体(entities)类型，而非值类型(value typed)（例如，类别与个体，或母猫和小猫）。 实体有自己的生命期，允许共享对其的引用（因此从集合中移除一个实体，不意味着它可以被删除）， 并且实体到其他关联实体之间默认没有级联操作的设置。 Hibernate默认不实现所谓的可到达即持久化（persistence by reachability）的策略。 
+
+每个Hibernate session的基本操作 - 包括 persist(), merge(), saveOrUpdate(), delete(), lock(), refresh(), evict(), replicate() - 都有对应的级联风格(cascade style)。 这些级联风格(cascade style)风格分别命名为 create, merge, save-update, delete, lock, refresh, evict, replicate。 如果你希望一个操作被顺着关联关系级联传播，你必须在映射文件中指出这一点。例如： 
+
+<one-to-one name="person" cascade="create"/>
+级联风格(cascade style)是可组合的: 
+
+<one-to-one name="person" cascade="create,delete,lock"/>
+你可以使用cascade="all"来指定全部操作都顺着关联关系级联(cascaded)。 默认值是cascade="none"，即任何操作都不会被级联(cascaded)。 
+
+注意有一个特殊的级联风格(cascade style) delete-orphan，只应用于one-to-many关联，表明delete()操作 应该被应用于所有从关联中删除的对象。 
+
+建议: 
+
+通常在<many-to-one>或<many-to-many>关系中应用级联(cascade)没什么意义。 级联(cascade)通常在 <one-to-one>和<one-to-many>关系中比较有用。 
+
+如果子对象的寿命限定在父亲对象的寿命之内，可通过指定cascade="all,delete-orphan"将其变为自动生命周期管理的对象(lifecycle object)。 
+
+其他情况，你可根本不需要级联(cascade)。但是如果你认为你会经常在某个事务中同时用到父对象与子对象，并且你希望少打点儿字，可以考虑使用cascade="create,merge,save-update"。 
+
+可以使用cascade="all"将一个关联关系（无论是对值对象的关联，或者对一个集合的关联）标记为父/子关系的关联。 这样对父对象进行save/update/delete操作就会导致子对象也进行save/update/delete操作。 
+
+此外，一个持久的父对象对子对象的浅引用(mere reference)会导致子对象被同步save/update。 不过，这个隐喻(metaphor)的说法并不完整。除非关联是<one-to-many>关联并且被标记为cascade="delete-orphan"， 否则父对象失去对某个子对象的引用不会导致该子对象被自动删除。 父子关系的级联(cascading)操作准确语义如下： 
+
+如果父对象被persist()，那么所有子对象也会被persist() 
+
+如果父对象被merge()，那么所有子对象也会被merge() 
+
+如果父对象被save()，update()或 saveOrUpdate()，那么所有子对象则会被saveOrUpdate() 
+
+如果某个持久的父对象引用了瞬时(transient)或者脱管(detached)的子对象，那么子对象将会被saveOrUpdate() 
+
+如果父对象被删除，那么所有子对象也会被delete() 
+
+除非被标记为cascade="delete-orphan"（删除“孤儿”模式，此时不被任何一个父对象引用的子对象会被删除）， 否则子对象失掉父对象对其的引用时，什么事也不会发生。 如果有特殊需要，应用程序可通过显式调用delete()删除子对象。
+ 
+调用 close() 标志session的结束。 close()方法重要的暗示是，session释放了JDBC连接。 
+
+
+
+
+
+
+Hibernate数据保存——Session.save  
+ 
+Session.save方法用户实体对象到数据库的持久化操作。也就是说，Session.save方法调用与实体对象所匹配的Insert SQL，将数据插入库表。Session.save方法中包含了以下几个主要步骤： 
+
+在Session内部缓存中寻找待保存的对象。内部缓存命中，则认为此数据已经保存（执行过insert操作），实体对象已经处于Persistent状态，直接返回。此时，即使数据相对之前状态已经发生了变化，也将在稍后的事务提交时，由脏数据检查过程加以判断，并根据判断结果决定是否要执行对应的Update操作。 
+如果实体类实现了Lifecycle接口，则调用待保存对象的onSave方法。 
+如果实体类实现了Validatable接口，则调用其validate方法 
+调用对应拦截器的Interceptor.onSave方法（如果有的话） 
+构造Insert SQL，并执行 
+记录插入成功，实体对象的id被设定未insert操作返回的新记录id值 
+将user对象放入内部缓存。这里值得一提的时save方法不会把实体对象纳入二级缓存，因为通过save方法保存的实体对象，在事务的剩余部分中被修改的几率往往很高，缓存的频繁更新以及随之而来的数据同步问题的代价，已经超过了此数据得到重用的可能收益，得不偿失。 
+最好，如果存在级连关系，对级连关系进行递归处理。
+ 
+Inverse和Cascade
+Inverse，直译为“反转”。在Hibernate语义中，Inverse指定了关联关系中的
+方向。
+关联关系中，inverse=”false”的为主动方，由主动方负责维护关联关系。具体可
+参见一对多关系中的描述。
+而Cascade，译为“级联”，表明对象的级联关系，如TUser的Cascade设为all，
+就表明如果发生对user对象的操作，需要对user所关联的对象也进行同样的操作。如对
+user对象执行save操作，则必须对user对象相关联的address也执行save操作。
+

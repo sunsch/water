@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2010-6-1 15:25:51 by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.framework.auto.basicentity.Groups" table="groups"  catalog="exam">
+        <id name="gid" type="int">
+            <column name="gid" />
+			<generator class="native" />
+        </id>
+        <property name="gname" type="string">
+            <column name="gname" length="50" />
+        </property>
+        <property name="gdescription" type="string">
+            <column name="gdescription" length="200" />
+        </property>
+        <set name="ugRelations" inverse="true">
+            <key>
+                <column name="gid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.UgRelation" />
+        </set>
+        <set name="grRelations" inverse="true">
+            <key>
+                <column name="gid" not-null="true" />
+            </key>
+            <one-to-many class="com.framework.auto.basicentity.GrRelation" />
+        </set>
+    </class>
+</hibernate-mapping>

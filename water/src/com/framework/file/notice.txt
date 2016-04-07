@@ -1,0 +1,526 @@
+You must start a Transaction. By default Session is opened with no transaction. It must be started with Session.beginTransaction() and later commit/rollback.
+See how this is done in docs with HibernateTransactionManager.
+
+Also you might want to check if a transaction is marked as being read only.
+
+12.2.6. Programmatic transaction demarcation
+
+On top of such lower-level data access services, transactions can be demarcated in a higher level of the application, spanning any number of operations. There are no restrictions on the implementation of the surrounding business service here as well, it just needs a Spring PlatformTransactionManager. Again, the latter can come from anywhere, but preferably as bean reference via a setTransactionManager method - just like the productDAO should be set via a setProductDao method. The following snippets show a transaction manager and a business service definition in a Spring application context, and an example for a business method implementation.
+
+<beans>
+  ...
+
+  <bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
+    <property name="sessionFactory" ref="mySessionFactory"/>
+  </bean>
+
+  <bean id="myProductService" class="product.ProductServiceImpl">
+    <property name="transactionManager" ref="myTxManager"/>
+    <property name="productDao" ref="myProductDao"/>
+  </bean>
+
+</beans>
+
+public class ProductServiceImpl implements ProductService {
+
+    private PlatformTransactionManager transactionManager;
+    private ProductDao productDao;
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    public void increasePriceOfAllProductsInCategory(final String category) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(this.transactionManager);
+        transactionTemplate.execute(
+            new TransactionCallbackWithoutResult() {
+                public void doInTransactionWithoutResult(TransactionStatus status) {
+                    List productsToChange = productDAO.loadProductsByCategory(category);
+                    ...
+                }
+            }
+        );
+    }
+}
+
+12.2.7. Declarative transaction demarcation
+
+Alternatively, one can use Spring's AOP TransactionInterceptor, replacing the transaction demarcation code with an interceptor configuration in the application context. This allows you to keep business services free of repetitive transaction demarcation code in each business method. Furthermore, transaction semantics like propagation behavior and isolation level can be changed in a configuration file and do not affect the business service implementations.
+
+<beans>
+    ...
+
+  <bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
+    <property name="sessionFactory" ref="mySessionFactory"/>
+  </bean>
+
+  <bean id="myTxInterceptor"
+      class="org.springframework.transaction.interceptor.TransactionInterceptor">
+    <property name="transactionManager" ref="myTxManager"/>
+    <property name="transactionAttributeSource">
+      <value>
+        product.ProductService.increasePrice*=PROPAGATION_REQUIRED
+        product.ProductService.someOtherBusinessMethod=PROPAGATION_MANDATORY
+      </value>
+    </property>
+  </bean>
+
+  <bean id="myProductServiceTarget" class="product.ProductServiceImpl">
+    <property name="productDao" ref="myProductDao"/>
+  </bean>
+
+  <bean id="myProductService" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="proxyInterfaces">
+      <value>product.ProductService</value>
+    </property>
+    <property name="interceptorNames">
+      <list>
+        <value>myTxInterceptor</value>
+        <value>myProductServiceTarget</value>
+      </list>
+    </property>
+  </bean>
+
+</beans>
+
+public class ProductServiceImpl implements ProductService {
+
+    private ProductDao productDao;
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    public void increasePriceOfAllProductsInCategory(final String category) {
+        List productsToChange = this.productDAO.loadProductsByCategory(category);
+        ...
+    }
+
+    ...
+}
+
+Spring's TransactionInterceptor allows any checked application exception to be thrown with the callback code, while TransactionTemplate is restricted to unchecked exceptions within the callback. TransactionTemplate will trigger a rollback in case of an unchecked application exception, or if the transaction has been marked rollback-only by the application (via TransactionStatus). TransactionInterceptor behaves the same way by default but allows configurable rollback policies per method. A convenient alternative way of setting up declarative transactions is TransactionProxyFactoryBean, particularly if there are no other AOP interceptors involved. TransactionProxyFactoryBean combines the proxy definition itself with transaction configuration for a particular target bean. This reduces the configuration effort to one target bean plus one proxy bean. Furthermore, you do not need to specify which interfaces or classes the transactional methods are defined in.
+
+<beans>
+  ...
+
+  <bean id="myTxManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
+    <property name="sessionFactory" ref="mySessionFactory"/>
+  </bean>
+
+  <bean id="myProductServiceTarget" class="product.ProductServiceImpl">
+    <property name="productDao" ref="myProductDao"/>
+  </bean>
+
+  <bean id="myProductService"
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <property name="transactionManager" ref="myTxManager"/>
+    <property name="target" ref="myProductServiceTarget"/>
+    <property name="transactionAttributes">
+      <props>
+        <prop key="increasePrice*">PROPAGATION_REQUIRED</prop>
+        <prop key="someOtherBusinessMethod">PROPAGATION_REQUIRES_NEW</prop>
+        <prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
+      </props>
+    </property>
+  </bean>
+
+</beans>
+
+
+getHibernateTemplate().save(u); can not save, the reason as below:
+我今天也遇到这个问题了
+是因为事务没提交 或 是回滚了的结果
+原因是你集成了spring  用myeclipse生产的代码
+你在hibernate.xml配置文件里加上
+<property name="connection.autocommit">true </property> 变搞定
+
+
+ MyEclipse生成的Spring+Hibernate无法保存数据问题的解决方法 收藏
+ 
+
+用 MyEclipse 的自动生成功能产生的 Spring + Hibernate 的 DAO 有时候会出现不能保存数据但是可以查询数据的问题, 这是因为默认生成的 Spring 配置文件里面没有包含对事务的操作, 也就是没有 commit Hibernate transaction 的调用所以无法保存数据. 也就是正确的调用需要 beginTran, save, commit, 但是现在就少了 tran 的调用代码部分. 因为刚刚接触 Spring 这个 "轻量级" 非侵入框架不久, 所以好多问题不是太熟悉, 最近收集了一些资料看了看总算解决了问题. 有问题不要紧, 只要能通过学习来解决它就可以了, 我个人并不很喜欢没事去精通 XXX 框架, 而是喜欢做一些解决问题和查资料能力的锻炼, 有了后面所提的能力, 不管改天是不是出了个 Winter 框架, 也不会担心落伍, 当然前提是基础知识要牢固, 否则很容易看不懂.
+
+解决方法是在配置文件里"侵入性"(必须这样做, 做额外的配置和修改, 否则就无法正常工作, 所以是侵入性的)的加入事务配置后就可以正常的保存数据到 Derby, Oracle 等数据了, 也有其它的解决办法, 希望用 Spring 比较早的经验多的人提出建议:
+
+1. 用 Ecipse 的重构给自动生成的 UsersDAO 类添加一个接口, 里面包含所有的方法声明, 例如 IUsersDAO, 加入接口的目的是为了使用 JDK 的动态代理方式实现的 Spring AOP 来工作, 也有另一种解决方案使用 CGLIB 的话就不需要这一步了, 这种方式下一次讨论.
+
+public interface IUsersDAO {
+
+ public abstract void save(Users transientInstance);
+}
+
+public class UsersDAO extends HibernateDaoSupport implements IUsersDAO {
+...
+ public void save(Users transientInstance) {
+  log.debug("saving Users instance");
+  try {
+   getHibernateTemplate().save(transientInstance);
+   log.debug("save successful");
+  } catch (RuntimeException re) {
+   log.error("save failed", re);
+   throw re;
+ }
+...
+}
+
+2. 修改配置文件给原来的 UsersDAO 加入代理类来进行事务管理:
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+
+ <bean id="sessionFactory"
+  class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+  <property name="configLocation"
+   value="file:src/hibernate.cfg.xml">
+  </property>
+ </bean>
+
+ <!-- UsersDAO implements IUsersDAO 接口 -->
+ <bean id="UsersDAO" class="dao.UsersDAO">
+  <property name="sessionFactory">
+   <ref bean="sessionFactory" />
+  </property>
+ </bean>
+
+ <!-- 以下两个 Bean transactionManager 和 userDAOProxy 是新加入的内容, 用来配置事务 -->
+
+
+ <!-- 声明一个 Hibernate 3 的 事务管理器供代理类自动管理事务用 -->
+ <bean id="transactionManager"
+  class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+  <property name="sessionFactory">
+   <ref local="sessionFactory" />
+  </property>
+ </bean>
+
+ <!-- 这个代理类是最后对外公开的类, 否则因为没有进行事务操作,
+ 保存时没有提交 hibernate 的事务, 这将无法对数据库进行改动, 也就是原来要调用 UsersDAO 的地方都要转而调用这个代理对象 userDAOProxy; 具体的属性配置在 target 参数那里指定了这个对象对原来的 UsersDAO 对象进行代理;
+ 也因为要使用动态代理, 所以这里必须给 UsersDAO 抽象一个接口 IUsersDAO, 只有通过它来作为原来配置的 UsersDAO 的代理工作, 才能让 Spring 在保存数据的时候自动打开 Hibernate 的 Transaction 并提交, 即属性 transactionManager 配置的 HibernateTransactionManager -->
+ 
+ <bean id="userDAOProxy"
+  class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+  <property name="transactionManager">
+   <ref bean="transactionManager" />
+  </property>
+  <property name="target">
+   <ref local="UsersDAO" />
+  </property>
+  <property name="transactionAttributes">
+   <props>
+    <!-- 这里的方法签名可以精确到方法, 先懒惰一下全配置上 -->
+    <prop key="*">PROPAGATION_REQUIRED</prop>
+   </props>
+  </property>
+ </bean>
+
+</beans>
+
+3. 修改调用代码, 原来调用 UsersDAO 的地方都要转而调用 userDAOProxy, 而且转换后的目标要修改为 IUsersDAO, 否则就会报 ClassCastException, 具体原因参考 Spring 的 AOP 实现部分的内容, 也可以用 cglib 来解决.
+  原始代码:
+  UsersDAO dao = applicationContext.getBean("UsersDAO");
+  dao.save(users);// 可能无法保存数据, 因为没有事务管理
+  修改为:
+  IUsersDAO dao = applicationContext.getBean("userDAOProxy");
+  dao.save(users);// 现在应该 OK 了, 因为事务提交了
+  
+  
+  
+  spring自建事务管理模块。而且这个事务管理是一个抽象设计，可以应用到很多场合，包括普通的DataSource，jta，jms和hibernate上。
+
+要正确使用spring的事务，首先需要了解spring在事务设计上的一些概念
+统观spring事务，围绕着两个核心PlatformTransactionManager和TransactionStatus
+
+PlatformTransactionManager直译过来就是平台相关事务，这里的平台指的是“事务源”，包括刚才我说的 DataSource，jta等等。这些无一不是一个事务源。广义的说，凡是可以完成事务性操作的对象，都可以设计出相对应的 PlatformTransactionManager，只要这个事务源支持commit，rollback和getTransaction语意。
+
+查看spring代码，可以发现这些manager实现事务，就是调用事务源的事务操作方法
+
+比如
+
+HibernateTransactionManager
+Java代码
+
+   1. protected void doCommit(DefaultTransactionStatus status); {  
+   2.         HibernateTransactionObject txObject = (HibernateTransactionObject); status.getTransaction();;  
+   3.         if (status.isDebug();); {  
+   4.             logger.debug("Committing Hibernate transaction on session [" +  
+   5.                     txObject.getSessionHolder();.getSession(); + "]");;  
+   6.         }  
+   7.         try {  
+   8.             txObject.getSessionHolder();.getTransaction();.commit();;  
+   9.         }  
+  10. ...  
+  11.   
+  12.     }  
+
+protected void doCommit(DefaultTransactionStatus status); {
+		HibernateTransactionObject txObject = (HibernateTransactionObject); status.getTransaction();;
+		if (status.isDebug();); {
+			logger.debug("Committing Hibernate transaction on session [" +
+					txObject.getSessionHolder();.getSession(); + "]");;
+		}
+		try {
+			txObject.getSessionHolder();.getTransaction();.commit();;
+		}
+...
+
+	}
+
+
+
+
+jdbc 的DataSourceTransactionManager
+Java代码
+
+   1. protected void doCommit(DefaultTransactionStatus status); {  
+   2.         DataSourceTransactionObject txObject = (DataSourceTransactionObject); status.getTransaction();;  
+   3.         Connection con = txObject.getConnectionHolder();.getConnection();;  
+   4.         if (status.isDebug();); {  
+   5.             logger.debug("Committing JDBC transaction on connection [" + con + "]");;  
+   6.         }  
+   7.         try {  
+   8.             con.commit();;  
+   9.         }  
+  10.         ...  
+  11.     }  
+
+protected void doCommit(DefaultTransactionStatus status); {
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject); status.getTransaction();;
+		Connection con = txObject.getConnectionHolder();.getConnection();;
+		if (status.isDebug();); {
+			logger.debug("Committing JDBC transaction on connection [" + con + "]");;
+		}
+		try {
+			con.commit();;
+		}
+		...
+	}
+
+
+
+
+那么PlatformTransactionManager以什么依据处理事务呢？
+是TransactionStatus
+查看api发现这个接口有三个方法
+isNewTransaction() ，isRollbackOnly()，setRollbackOnly()
+PlatformTransactionManager就是根据前两个方法决定是否要创建一个新事务，是要递交还是回滚。至于第三个方法是改变事务当前状态的，很多地方都要用到，偏偏PlatformTransactionManager自身好像不怎么用，毕竟事务状态的改变是由程序员代码决定的，不需要一个manager多管闲事。
+
+总结上面所说的，spring的事务由PlatformTransactionManager管理，manager最后调用事务源的方法来实现一个事务过程。而manager通过TransactionStatus 来决定如何实现。
+
+接下去说spring事务中的TransactionTemplate和TransactionInterceptor
+
+TransactionTemplate其实和spring中其他的template的作用类似，起到化简代码的作用，不要被它那么长的名字吓倒了，事实上这个template并不是什么非常核心的对象。如果比较学究派的，可以去看看template设计模式，在此就不再对此赘述了。
+为什么要有TransactionTemplate？先来看看如果没有TransactionTemplate，我们的代码该怎么写
+
+先来看看spring reference中的一段代码
+Java代码
+
+   1. DefaultTransactionDefinition def = new DefaultTransactionDefinition();  
+   2. def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);;  
+   3.   
+   4. TransactionStatus status = transactionManager.getTransaction(def);;  
+   5.   
+   6. try {  
+   7.     // execute your business logic here  
+   8. } catch (MyException ex); {  
+   9.     transactionManager.rollback(status);;  
+  10.     throw ex;  
+  11. }  
+  12. transactionManager.commit(status);;  
+
+DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);;
+
+TransactionStatus status = transactionManager.getTransaction(def);;
+
+try {
+    // execute your business logic here
+} catch (MyException ex); {
+    transactionManager.rollback(status);;
+    throw ex;
+}
+transactionManager.commit(status);;
+
+
+这是直接使用transactionManager的例子，可以看到真正执行business logic 的地方是在try当中那段，前后的代码都是为了完成事务管理的。如果每个business logic都要写上那么一段，我肯定是疯了。我们翻出TransactionTemplate的代码看看他怎么化简了我们的代码
+
+Java代码
+
+   1. public Object execute(TransactionCallback action); throws TransactionException {  
+   2.         TransactionStatus status = this.transactionManager.getTransaction(this);;  
+   3.         Object result = null;  
+   4.         try {  
+   5.             result = action.doInTransaction(status);;  
+   6.         }  
+   7.         catch (RuntimeException ex); {  
+   8.             // transactional code threw application exception -> rollback  
+   9.             rollbackOnException(status, ex);;  
+  10.             throw ex;  
+  11.         }  
+  12.         catch (Error err); {  
+  13.             // transactional code threw error -> rollback  
+  14.             rollbackOnException(status, err);;  
+  15.             throw err;  
+  16.         }  
+  17.         this.transactionManager.commit(status);;  
+  18.         return result;  
+  19.     }  
+
+public Object execute(TransactionCallback action); throws TransactionException {
+		TransactionStatus status = this.transactionManager.getTransaction(this);;
+		Object result = null;
+		try {
+			result = action.doInTransaction(status);;
+		}
+		catch (RuntimeException ex); {
+			// transactional code threw application exception -> rollback
+			rollbackOnException(status, ex);;
+			throw ex;
+		}
+		catch (Error err); {
+			// transactional code threw error -> rollback
+			rollbackOnException(status, err);;
+			throw err;
+		}
+		this.transactionManager.commit(status);;
+		return result;
+	}
+
+
+
+同上面的代码如出一辙，前后是事务处理代码，当中那段result = action.doInTransaction(status);是我们的应用代码。至于action是什么，全看各位的需要了。但是有一点要主要，如果利用TransactionTemplate，那么他不管你扔出什么异常都会回滚事务，但是回滚的是哪个事务呢？继续挖代码
+Java代码
+
+   1. private void rollbackOnException(TransactionStatus status, Throwable ex); throws TransactionException {  
+   2.         if (logger.isDebugEnabled();); {  
+   3.             logger.debug("Initiating transaction rollback on application exception", ex);;  
+   4.         }  
+   5.         try {  
+   6.             this.transactionManager.rollback(status);;  
+   7.         }  
+   8.         catch (RuntimeException ex2); {  
+   9.             logger.error("Application exception overridden by rollback exception", ex);;  
+  10.             throw ex2;  
+  11.         }  
+  12.         catch (Error err); {  
+  13.             logger.error("Application exception overridden by rollback error", ex);;  
+  14.             throw err;  
+  15.         }  
+  16.     }  
+
+private void rollbackOnException(TransactionStatus status, Throwable ex); throws TransactionException {
+		if (logger.isDebugEnabled();); {
+			logger.debug("Initiating transaction rollback on application exception", ex);;
+		}
+		try {
+			this.transactionManager.rollback(status);;
+		}
+		catch (RuntimeException ex2); {
+			logger.error("Application exception overridden by rollback exception", ex);;
+			throw ex2;
+		}
+		catch (Error err); {
+			logger.error("Application exception overridden by rollback error", ex);;
+			throw err;
+		}
+	}
+
+
+真相大白，是对template所持有的某个transactionManager进行回滚。所以如果你的应用代码用的是事务源a的一些资源，比如到服务器a的一个datasource，但是你的transactionManager管理的是另一些资源，比如服务器b的一个datasource，代码铁定不会正常运行
+
+特别是在一些多事务源的程序里，这点千万不能搞错。如果多个事务源之间要完成全局事务，还是老老实实用分布式事务管理服务吧（jta）
+
+那么TransactionInterceptor是干什么的？这个是spring 的声明式事务的支持方式。因为用TransactionTemplate要硬编码，而且调整事务策略很麻烦（不是说不能调。举个例子原来程序抛出异常A需要回滚，现在不需要要，我就可以把a catch吃掉。这时候template就不会回滚了。但是每次调整都要重写编码。）而用TransactionInterceptor就可以将这些调整写在配置中。我们再来挖TransactionInterceptor的代码
+
+Java代码
+
+   1. public Object invoke(MethodInvocation invocation); throws Throwable {  
+   2.         // Work out the target class: may be null.  
+   3.         // The TransactionAttributeSource should be passed the target class  
+   4.         // as well as the method, which may be from an interface  
+   5.         Class targetClass = (invocation.getThis(); != null); ? invocation.getThis();.getClass(); : null;  
+   6.           
+   7.         // Create transaction if necessary  
+   8.         TransactionInfo txInfo = createTransactionIfNecessary(invocation.getMethod();, targetClass);;  
+   9.   
+  10.         Object retVal = null;  
+  11.         try {  
+  12.             // This is an around advice.  
+  13.             // Invoke the next interceptor in the chain.  
+  14.             // This will normally result in a target object being invoked.  
+  15.             retVal = invocation.proceed();;  
+  16.         }  
+  17.         catch (Throwable ex); {  
+  18.             // target invocation exception  
+  19.             doCloseTransactionAfterThrowing(txInfo, ex);;  
+  20.             throw ex;  
+  21.         }  
+  22.         finally {  
+  23.             doFinally(txInfo);;  
+  24.         }  
+  25.         doCommitTransactionAfterReturning(txInfo);;  
+  26.   
+  27.         return retVal;  
+  28.     }  
+
+public Object invoke(MethodInvocation invocation); throws Throwable {
+		// Work out the target class: may be null.
+		// The TransactionAttributeSource should be passed the target class
+		// as well as the method, which may be from an interface
+		Class targetClass = (invocation.getThis(); != null); ? invocation.getThis();.getClass(); : null;
+		
+		// Create transaction if necessary
+		TransactionInfo txInfo = createTransactionIfNecessary(invocation.getMethod();, targetClass);;
+
+		Object retVal = null;
+		try {
+			// This is an around advice.
+			// Invoke the next interceptor in the chain.
+			// This will normally result in a target object being invoked.
+			retVal = invocation.proceed();;
+		}
+		catch (Throwable ex); {
+			// target invocation exception
+			doCloseTransactionAfterThrowing(txInfo, ex);;
+			throw ex;
+		}
+		finally {
+			doFinally(txInfo);;
+		}
+		doCommitTransactionAfterReturning(txInfo);;
+
+		return retVal;
+	}
+
+
+万变不离其宗。
+
+所以使用spring的事务管理需要作这些事
+1，设置好事务源，比如DataSource，hibernate的session。如果有多个事务源要考虑他们之间是否有全局事务，如果有，老老实实用jta，否则就需要自己写一个manager了
+2，设置manager，根据你的事务源选择对应的PlatformTransactionManager
+3，选择实现事物的方式，用template还是interceptor。用template代码直观点，但是template所管辖的 manager和你应用代码所用的事务源要一致。如果用interceptor千万注意，一定要调用interceptor那个bean，而不是原始的那个target。在坛子上我已经看到至少有两个朋友说spring事物不起作用，从配置和代码上看都正确，这时要好好查查，调用的bean是哪一个。
+4，这个是设计问题了，推荐事务处于一个较高层次，比如service上的某个函数，而底层的dao可以不考虑事务，否则可能会出现事务嵌套，增加程序复杂度。
+
+PROPAGATION_REQUIRED 支持当前事务，如果当前没有事务，则建立一个新事务
+PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行
+PROPAGATION_MANDATORY 支持当前事务，如果当前没有事务，就抛出异常
+PROPAGATION_REQUIRED_NEW 新建事务，如果存在当前事务，就把当前事务挂起
+PROPAGATION_NOT_SUPPORTED 以非事务方式执行，如果存在当前事务，则进行
+PROPAGATION_NEVER  以非事务方式执行，如果存在当前事务，则抛出异常
+PROPAGATION_NESTED 如果存在当前事务，则在嵌套事务内执行，如果没有当前事务，则进行
+                                                                   与 PROPAGATION_REQUIRED一样的操作
+
+http://ioio.javaeye.com/blog/388894
+http://www.diybl.com/course/3_program/java/javajs/2008324/106033.html
+http://developer.51cto.com/art/200906/131588.htm
+
+
+http://blog.csdn.net/fullbug/archive/2007/09/02/1769029.aspx
+http://www.javaeye.com/wiki/topic/80943
+  

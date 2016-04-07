@@ -1,0 +1,81 @@
+Tomcat6.0连接池配置
+  1.配置tomcat下的conf下的context.xml文件,在之间添加连接池配置:
+<Resource name="jdbc/sample"
+auth="Container"
+type="javax.sql.DataSource"
+driverClassName="com.microsoft.sqlserver.jdbc.SqlserverDriver"
+url="jdbc:sqlserver://localhost:8080;databaseName=test"
+username="sa"
+password="sa"
+maxActive="100"
+maxIdle="30"
+maxWait="10000" />
+
+2.配置你的应用程序下的web.xml中的之间加入:
+<resource-ref>
+<description>DB Connection</description>
+<res-ref-name>jdbc/sample</res-ref-name>
+<res-type>javax.sql.DataSource</res-type>
+<res-auth>Container</res-auth>
+</resource-ref>
+
+3.把连接数据库的第三方驱动放到common/lib下面就ok了
+4.测试程序（关键代码）
+Context ctx = new InitialContext();
+DataSource ds = (DataSource)ctx.lookup("jdbc/sample");
+Connection con = ds.getConnection();
+以下和JDBC操作代码相同 
+
+
+
+2楼
+apache+tomcat+mysql
+
+ Apache+Tomcat+Mysql网站配置
+前言：
+公司开发了一个网站，估计最高在线人数是3万，并发人数最多100人。开发的网站是否能否承受这个压力，如何确保网站的负荷没有问题，经过研究决定如下：
+（1） 采用负载平衡和集群技术，初步机构采用Apache+Tomcat的机群技术。
+（2） 采用压力测试工具，测试压力。工具是Loadrunner。
+硬件环境搭建：
+为了能够进行压力测试，需要搭建一个环境。刚开始时，测试在公司局域网内进行，但很快发现了一个问题，即一个脚本的压力测试结果每次都不一样，并且差别很大。原来是受公司网络的影响，于是决定搭建一个完全隔离的局域网测试。搭建后的局域网配置如下：
+（1） 网络速度：100M
+（2） 三台服务器：
+负载服务器 ：操作系统windows2003，
+Tomcat服务器：操作系统windows2000 Professional
+数据库服务器：操作系统windows2000 Professional
+三台机器的cpu 2.4 G, 内存 1G。
+软件环境搭建：
+软件的版本如下：
+Apache 版本：2.054，
+Tomcat5.0.30,
+mysql ：4.1.14.
+JDK1.5
+压力测试工具：Loadrunner7.8。
+负载平衡方案如下：
+一台机器（操作系统2003）安装apache，作为负载服务器，并安装tomcat作为一个worker；一个单独安装tomcat，作为第二个worker；剩下的一台单独作为数据库服务器。
+ Apache和tomcat的负载平衡采用JK1.2.14（没有采用2.0，主要是2.0不再维护了）。
+集群方案：
+ 采用Tomcat本身的集群方案。在server.xml配置。
+压力测试问题：
+压力测试后，发现了一些问题，现一一列出来：
+（1）采用Tocmat集群后，速度变得很慢。因为集群后，要进行session复制，导致速度较慢。Tomcatd的复制，目前不支持 application 复制。复制的作用，主要用来容错的，即一台机器有故障后，apache可以把请求自动转发到另外一个机器。在容错和速度的考虑上，我们最终选择速度，去掉了Tomcat集群。
+（2） 操作系统最大并发用户的限制：
+ 为了采用网站的压力，我们开始的时候，仅测试Tomcat的最大负载数。 Tomcat服务器安装的操作系统是 windows2000 Professional。当我们用压力测试工具，并发测试时，发现只要超过15个并发用户，会经常出现无法连接服务器的情况。经过研究，发现是操作系统的问题：windows2000 Professional 支持的并发访问用户有限，默认的好像是15个。于是我们把操作系统全部采用windows2003 server版本。
+（3） 数据库连接池的问题：
+测试数据库连接性能时，发现数据库连接速度很慢。每增加一些用户，连接性能就差了很多。我们采用的数据库连接池是DBCP，默认的初始化为50 个，应该不会很慢吧。查询数据库的连接数，发现初始化，只初始化一个连接。并发增加一个用户时，程序就会重新创建一个连接，导致连接很慢。原因就在这里了。如何解决呢？偶尔在 JDK1.4下的Tomcat5.0.30下执行数据库连接压力测试，发现速度很快，程序创建数据库连接的速度也是很快的。看来 JDK1.5的JDBC驱动程序有问题。于是我们修改 JDK的版本为1.4.
+
+（4） C3P0和DBCP
+C3P0是Hibernate3.0默认的自带数据库连接池，DBCP是Apache开发的数据库连接池。我们对这两种连接池进行压力测试对比，发现在并发300个用户以下时，DBCP比C3P0平均时间快1秒左右。但在并发400个用户时，两者差不多。
+
+速度上虽然DBCP比C3P0快些，但是有BUG：当DBCP建立的数据库连接，因为某种原因断掉后，DBCP将不会再重新创建新的连接，导致必须重新启动Tomcat才能解决问题。DBCP的BUG使我们决定采用C3P0作为数据库连接池。
+调整后的方案：
+操作系统Windows2003 server版本
+JDK1.4
+Tomcat 5.0.30
+数据库连接池C3P0
+仅采用负载平衡，不采用集群。
+软件的配置：
+Apache配置：主要配置httpd.conf和新增加的文件workers.properties
+Httpd.conf：
+#一个连接的最大请求数量
+
